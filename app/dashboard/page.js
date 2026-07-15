@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { getBookings } from '@/lib/bookings'
 import BookingStatus from '@/components/BookingStatus'
 
 export default function DashboardPage() {
@@ -18,7 +17,11 @@ export default function DashboardPage() {
 
   async function fetchBookings() {
     try {
-      const data = await getBookings(session.user.id)
+      const response = await fetch('/api/bookings')
+      if (!response.ok) {
+        throw new Error('Failed to fetch bookings')
+      }
+      const data = await response.json()
       setBookings(data)
     } catch (error) {
       console.error('Failed to fetch bookings:', error)

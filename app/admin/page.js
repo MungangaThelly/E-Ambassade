@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getAllBookings } from '@/lib/bookings'
 import AdminDashboard from '@/components/AdminDashboard'
 
 export default function AdminPage() {
@@ -15,20 +14,14 @@ export default function AdminPage() {
 
   async function fetchAdminData() {
     try {
-      const bookingsData = await getAllBookings()
-      setBookings(bookingsData)
+      const response = await fetch('/api/admin')
+      if (!response.ok) {
+        throw new Error('Failed to fetch admin data')
+      }
 
-      const totalBookings = bookingsData.length
-      const pendingBookings = bookingsData.filter(b => b.status === 'pending').length
-      const completedBookings = bookingsData.filter(b => b.status === 'completed').length
-
-      setStats({
-        totalBookings,
-        pendingBookings,
-        completedBookings,
-        totalUsers: 0,
-        activeUsers: 0,
-      })
+      const data = await response.json()
+      setBookings(data.bookings || [])
+      setStats(data)
     } catch (error) {
       console.error('Failed to fetch admin data:', error)
     } finally {

@@ -1,3 +1,4 @@
+import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { loginUser } from '@/lib/auth'
 
@@ -46,9 +47,10 @@ export const authOptions = {
     signIn: '/auth/signin',
     error: '/auth/signin',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+  trustHost: true,
 }
 
-export async function GET(request) {
-  return new Response('NextAuth API endpoint', { status: 200 })
-}
+const handler = NextAuth(authOptions)
+
+export { handler as GET, handler as POST }

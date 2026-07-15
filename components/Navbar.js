@@ -1,0 +1,65 @@
+'use client'
+
+import { useState } from 'react'
+import { signIn, signOut, useSession } from 'next-auth/react'
+import Link from 'next/link'
+
+export default function Navbar() {
+  const { data: session } = useSession()
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  return (
+    <nav className="bg-white shadow-sm sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <Link href="/" className="text-2xl font-bold text-blue-600">
+          e-Ambassade
+        </Link>
+
+        <button
+          className="md:hidden"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <div className={`flex-col md:flex-row md:flex items-center gap-4 ${menuOpen ? 'flex' : 'hidden'} md:block`}>
+          {session ? (
+            <>
+              <span className="text-gray-700">
+                Hej, {session.user.name}
+              </span>
+              <Link href="/dashboard" className="hover:text-blue-600">
+                Dashboard
+              </Link>
+              {session.user.role === 'admin' && (
+                <Link href="/admin" className="hover:text-blue-600">
+                  Admin
+                </Link>
+              )}
+              <button
+                onClick={() => signOut()}
+                className="btn btn-secondary"
+              >
+                Logga ut
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/booking" className="hover:text-blue-600">
+                Boka
+              </Link>
+              <Link href="/auth/signin" className="btn btn-primary">
+                Logga in
+              </Link>
+              <Link href="/auth/register" className="btn btn-secondary">
+                Registrera
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+    </nav>
+  )
+}

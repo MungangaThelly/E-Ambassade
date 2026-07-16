@@ -10,6 +10,7 @@ export async function POST(request) {
 
     const session = await getServerSession(authOptions)
 
+
     if (!session?.user) {
 
       return NextResponse.json(
@@ -31,13 +32,21 @@ export async function POST(request) {
 
       user_id: session.user.id,
 
-      date: body.date,
-
-      time: body.time,
-
       service_type: body.serviceType,
 
-      notes: body.notes || null,
+      appointment_date: body.date,
+
+      appointment_time: body.time,
+
+      full_name: body.full_name,
+
+      email: body.email,
+
+      phone: body.phone,
+
+      passport_number: body.passport_number,
+
+      message: body.notes || null,
 
       status: 'pending'
 
@@ -52,10 +61,10 @@ export async function POST(request) {
     )
 
 
-  } catch (error) {
+  } catch(error) {
 
     console.error(
-      'BOOKING ERROR:',
+      "BOOKING ERROR:",
       error
     )
 
@@ -65,7 +74,7 @@ export async function POST(request) {
         error: error.message
       },
       {
-        status: 500
+        status:500
       }
     )
 
@@ -74,6 +83,9 @@ export async function POST(request) {
 }
 
 
+
+
+// GET BOOKINGS FOR DASHBOARD
 
 export async function GET() {
 
@@ -86,10 +98,10 @@ export async function GET() {
 
       return NextResponse.json(
         {
-          error: 'Not authenticated'
+          error:'Not authenticated'
         },
         {
-          status: 401
+          status:401
         }
       )
 
@@ -106,20 +118,20 @@ export async function GET() {
     )
 
 
-  } catch (error) {
+  } catch(error) {
 
     console.error(
-      'GET BOOKINGS ERROR:',
+      "GET BOOKINGS ERROR:",
       error
     )
 
 
     return NextResponse.json(
       {
-        error: error.message
+        error:error.message
       },
       {
-        status: 500
+        status:500
       }
     )
 

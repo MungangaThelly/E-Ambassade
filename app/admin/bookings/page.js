@@ -1,12 +1,72 @@
 'use client'
 
-export default function AdminBookingsPage() {
+import { useEffect,useState } from 'react'
+import AdminBookings from '@/components/AdminBookings'
+
+
+export default function AdminBookingsPage(){
+
+  const [bookings,setBookings] = useState([])
+  const [loading,setLoading] = useState(true)
+
+
+  useEffect(()=>{
+
+    fetchBookings()
+
+  },[])
+
+
+
+  async function fetchBookings(){
+
+    try{
+
+      const res = await fetch('/api/admin/bookings')
+
+      const data = await res.json()
+
+      setBookings(data)
+
+
+    }catch(error){
+
+      console.error(error)
+
+    }finally{
+
+      setLoading(false)
+
+    }
+
+  }
+
+
+
+  if(loading){
+
+    return <div>Laddar bokningar...</div>
+
+  }
+
+
+
   return (
+
     <div>
-      <h1 className="text-3xl font-bold mb-6">Alla bokningar</h1>
-      <div className="bg-white p-6 rounded-lg shadow">
-        <p className="text-gray-600">Administratörsöversikten för bokningar kommer snart.</p>
-      </div>
+
+      <h1 className="text-3xl font-bold mb-6">
+        Alla bokningar
+      </h1>
+
+
+      <AdminBookings
+        bookings={bookings}
+      />
+
+
     </div>
+
   )
+
 }

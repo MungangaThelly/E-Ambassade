@@ -11,10 +11,16 @@ export async function POST(request) {
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
+
       return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
+        {
+          error: 'Not authenticated'
+        },
+        {
+          status: 401
+        }
       )
+
     }
 
 
@@ -25,13 +31,13 @@ export async function POST(request) {
 
       user_id: session.user.id,
 
-      appointment_date: body.date,
+      date: body.date,
 
-      appointment_time: body.time,
+      time: body.time,
 
       service_type: body.serviceType,
 
-      message: body.notes || null,
+      notes: body.notes || null,
 
       status: 'pending'
 
@@ -40,17 +46,27 @@ export async function POST(request) {
 
     return NextResponse.json(
       booking,
-      { status: 201 }
+      {
+        status: 201
+      }
     )
 
 
-  } catch(error) {
+  } catch (error) {
 
-    console.error(error)
+    console.error(
+      'BOOKING ERROR:',
+      error
+    )
+
 
     return NextResponse.json(
-      { error: error.message },
-      { status:500 }
+      {
+        error: error.message
+      },
+      {
+        status: 500
+      }
     )
 
   }
@@ -69,26 +85,42 @@ export async function GET() {
     if (!session?.user) {
 
       return NextResponse.json(
-        { error:'Not authenticated' },
-        { status:401 }
+        {
+          error: 'Not authenticated'
+        },
+        {
+          status: 401
+        }
       )
 
     }
 
 
-    const bookings = await getBookings(session.user.id)
+    const bookings = await getBookings(
+      session.user.id
+    )
 
-
-    return NextResponse.json(bookings)
-
-
-  } catch(error) {
-
-    console.error(error)
 
     return NextResponse.json(
-      { error:error.message },
-      { status:500 }
+      bookings
+    )
+
+
+  } catch (error) {
+
+    console.error(
+      'GET BOOKINGS ERROR:',
+      error
+    )
+
+
+    return NextResponse.json(
+      {
+        error: error.message
+      },
+      {
+        status: 500
+      }
     )
 
   }

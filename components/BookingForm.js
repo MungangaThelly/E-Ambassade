@@ -74,11 +74,11 @@ export default function BookingForm() {
 
       await axios.post('/api/bookings', {
 
-        date: formData.date,
+        appointment_date: formData.date,
 
-        time: formData.time,
+        appointment_time: formData.time,
 
-        serviceType: formData.serviceType,
+        service_type: formData.serviceType,
 
         full_name: formData.full_name,
 
@@ -88,8 +88,20 @@ export default function BookingForm() {
 
         passport_number: formData.passport_number,
 
-        notes: formData.notes,
+        message: formData.notes,
 
+      })
+
+
+      setFormData({
+        date: '',
+        time: '',
+        serviceType: '',
+        full_name: '',
+        email: '',
+        phone: '',
+        passport_number: '',
+        notes: '',
       })
 
 
@@ -135,17 +147,13 @@ export default function BookingForm() {
       className="bg-white rounded-lg shadow p-8"
     >
 
-
       {error && (
 
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-
           {error}
-
         </div>
 
       )}
-
 
 
       <div className="mb-6">
@@ -164,7 +172,6 @@ export default function BookingForm() {
       </div>
 
 
-
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">
           Email *
@@ -179,7 +186,6 @@ export default function BookingForm() {
           className="w-full px-4 py-2 border rounded-lg"
         />
       </div>
-
 
 
       <div className="mb-6">
@@ -198,7 +204,6 @@ export default function BookingForm() {
       </div>
 
 
-
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">
           Passnummer *
@@ -213,7 +218,6 @@ export default function BookingForm() {
           className="w-full px-4 py-2 border rounded-lg"
         />
       </div>
-
 
 
       <div className="mb-6">
@@ -232,7 +236,6 @@ export default function BookingForm() {
       </div>
 
 
-
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">
           Tid *
@@ -247,7 +250,6 @@ export default function BookingForm() {
           className="w-full px-4 py-2 border rounded-lg"
         />
       </div>
-
 
 
       <div className="mb-6">
@@ -280,13 +282,11 @@ export default function BookingForm() {
       </div>
 
 
-
       <div className="mb-6">
 
         <label className="block text-sm font-medium mb-2">
           Anteckningar
         </label>
-
 
         <textarea
           name="notes"
@@ -298,7 +298,6 @@ export default function BookingForm() {
         />
 
       </div>
-
 
 
       <button

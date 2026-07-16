@@ -20,13 +20,16 @@ export default function BookingStatus({ booking }) {
     }
 
     setLoading(true)
+
     try {
       await axios.patch(`/api/bookings/${booking.id}`, {
         status: 'cancelled',
       })
+
       setStatus('cancelled')
     } catch (error) {
       console.error('Failed to cancel booking:', error)
+      alert(error.response?.data?.error || 'Kunde inte avboka bokningen.')
     } finally {
       setLoading(false)
     }
@@ -39,34 +42,55 @@ export default function BookingStatus({ booking }) {
           <h3 className="text-lg font-bold text-gray-900">
             {booking.service_type}
           </h3>
+
           <p className="text-gray-600">
-            {new Date(booking.date).toLocaleDateString('sv-SE')} kl {booking.time}
+            {new Date(booking.appointment_date).toLocaleDateString('sv-SE')} kl{' '}
+            {booking.appointment_time}
+          </p>
+
+          <p className="text-sm text-gray-500 mt-1">
+            {booking.full_name}
+          </p>
+
+          <p className="text-sm text-gray-500">
+            {booking.email}
+          </p>
+
+          <p className="text-sm text-gray-500">
+            {booking.phone}
+          </p>
+
+          <p className="text-sm text-gray-500">
+            Passnummer: {booking.passport_number}
           </p>
         </div>
-        <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[status] || 'bg-gray-100'}`}>
+
+        <span
+          className={`px-3 py-1 rounded-full text-sm font-medium ${
+            statusColors[status] || 'bg-gray-100 text-gray-800'
+          }`}
+        >
           {status.charAt(0).toUpperCase() + status.slice(1)}
         </span>
       </div>
 
-      {booking.notes && (
+      {booking.message && (
         <div className="mb-4">
           <p className="text-sm text-gray-600">
-            <strong>Anteckningar:</strong> {booking.notes}
+            <strong>Anteckningar:</strong> {booking.message}
           </p>
         </div>
       )}
 
-      <div className="flex gap-2">
-        {status === 'pending' && (
-          <button
-            onClick={handleCancel}
-            disabled={loading}
-            className="btn btn-danger disabled:opacity-50"
-          >
-            Avboka
-          </button>
-        )}
-      </div>
+      {status === 'pending' && (
+        <button
+          onClick={handleCancel}
+          disabled={loading}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+        >
+          {loading ? 'Avbokar...' : 'Avboka'}
+        </button>
+      )}
     </div>
   )
 }

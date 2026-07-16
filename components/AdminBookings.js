@@ -1,17 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 
 
-export default function AdminBookings({
-  bookings
-}) {
+export default function AdminBookings({ bookings }) {
 
 
-  const [items, setItems] = useState(bookings)
+  const [items, setItems] = useState([])
 
   const [loadingId, setLoadingId] = useState(null)
+
+
+
+  useEffect(() => {
+
+    setItems(bookings)
+
+  }, [bookings])
+
 
 
 
@@ -33,7 +40,8 @@ export default function AdminBookings({
 
 
 
-  async function updateStatus(id, status){
+
+  async function updateStatus(id, status) {
 
 
     try {
@@ -55,23 +63,19 @@ export default function AdminBookings({
 
           booking.id === id
 
-          ?
+            ? {
+                ...booking,
+                status
+              }
 
-          {
-            ...booking,
-            status
-          }
-
-          :
-
-          booking
+            : booking
 
         )
 
       )
 
 
-    } catch(error){
+    } catch(error) {
 
       console.error(
         'Update booking error:',
@@ -86,6 +90,7 @@ export default function AdminBookings({
     }
 
   }
+
 
 
 
@@ -111,6 +116,8 @@ export default function AdminBookings({
 
         )
       }
+
+
 
 
 
@@ -145,39 +152,28 @@ export default function AdminBookings({
                   font-bold
                   mb-3
                 ">
-
                   {booking.service_type}
-
                 </h2>
 
 
 
                 <p>
                   <strong>Namn:</strong>{' '}
-                  {
-                    booking.profiles?.full_name ||
-                    'Ej angivet'
-                  }
+                  {booking.full_name || 'Ej angivet'}
                 </p>
 
 
 
                 <p>
                   <strong>Email:</strong>{' '}
-                  {
-                    booking.profiles?.email ||
-                    booking.email
-                  }
+                  {booking.email || 'Ej angivet'}
                 </p>
 
 
 
                 <p>
                   <strong>Telefon:</strong>{' '}
-                  {
-                    booking.profiles?.phone ||
-                    booking.phone
-                  }
+                  {booking.phone || 'Ej angivet'}
                 </p>
 
 
@@ -190,19 +186,15 @@ export default function AdminBookings({
 
 
                 <p className="mt-3">
-
                   <strong>Datum:</strong>{' '}
                   {booking.appointment_date}
-
                 </p>
 
 
 
                 <p>
-
                   <strong>Tid:</strong>{' '}
                   {booking.appointment_time}
-
                 </p>
 
 
@@ -221,7 +213,6 @@ export default function AdminBookings({
                 }
 
 
-
               </div>
 
 
@@ -237,15 +228,11 @@ export default function AdminBookings({
                     rounded-full
                     text-sm
                     font-medium
-                    ${
-                      statusColors[booking.status]
-                    }
+                    ${statusColors[booking.status] || ''}
                   `}
                 >
 
-                  {
-                    booking.status
-                  }
+                  {booking.status}
 
                 </span>
 
@@ -255,6 +242,7 @@ export default function AdminBookings({
 
 
             </div>
+
 
 
 
@@ -297,10 +285,9 @@ export default function AdminBookings({
                       "
 
                     >
-
                       Godkänn
-
                     </button>
+
 
 
 
@@ -328,9 +315,7 @@ export default function AdminBookings({
                       "
 
                     >
-
                       Avboka
-
                     </button>
 
 
@@ -338,6 +323,8 @@ export default function AdminBookings({
 
                 )
               }
+
+
 
 
 
@@ -378,8 +365,6 @@ export default function AdminBookings({
 
                 )
               }
-
-
 
 
 

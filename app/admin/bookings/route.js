@@ -6,7 +6,7 @@ import { getAllBookings } from '@/lib/bookings'
 
 export async function GET(){
 
-  try{
+  try {
 
     const session =
       await getServerSession(authOptions)
@@ -29,19 +29,21 @@ export async function GET(){
     }
 
 
-
     const bookings =
       await getAllBookings()
 
 
+    return NextResponse.json(
+      bookings
+    )
 
-    return NextResponse.json(bookings)
 
+  } catch(error){
 
-
-  }catch(error){
-
-    console.error(error)
+    console.error(
+      'ADMIN BOOKINGS ERROR:',
+      error
+    )
 
 
     return NextResponse.json(

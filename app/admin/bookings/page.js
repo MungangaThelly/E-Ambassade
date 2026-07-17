@@ -26,7 +26,7 @@ export default function AdminBookingsPage(){
 
       const data = await res.json()
 
-      console.log('ADMIN BOOKINGS API:', data)
+      //console.log('ADMIN BOOKINGS API:', data)
 
       setBookings(
         Array.isArray(data)

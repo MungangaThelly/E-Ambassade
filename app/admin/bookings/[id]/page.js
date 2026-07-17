@@ -29,7 +29,7 @@ export default function BookingDetailsPage(){
 
       const res =
         await fetch(
-          `/api/admin/${params.id}`
+          `/api/admin/bookings${params.id}`
         )
 
 
@@ -78,7 +78,7 @@ export default function BookingDetailsPage(){
 
       const res =
         await fetch(
-          `/api/admin/${params.id}`,
+          `/api/admin/bookings/${params.id}`,
           {
             method:'PATCH',
             headers:{

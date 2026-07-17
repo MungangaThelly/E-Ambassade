@@ -28,6 +28,9 @@ export default function BookingForm() {
     'Brand ambassadör',
     'Produktpresentation',
     'Eventkväll',
+    'Process visa applications',
+    'Process passport applications',
+    'Carte Consulaire',
     'Annan',
   ]
 

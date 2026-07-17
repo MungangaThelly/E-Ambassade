@@ -5,14 +5,87 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createNotification } from '@/lib/notifications'
 
 
-
 // GET SINGLE BOOKING
 export async function GET(
   request,
   { params }
 ) {
+  try {
+
+    const { id } = await params
+
+    const session =
+      await getServerSession(authOptions)
+
+    if (
+      !session?.user ||
+      session.user.role !== 'admin'
+    ) {
+      return NextResponse.json(
+        {
+          error: 'Unauthorized'
+        },
+        {
+          status: 403
+        }
+      )
+    }
+
+
+    const {
+      data,
+      error
+    } = await supabaseAdmin
+      .from('bookings')
+      .select('*')
+      .eq(
+        'id',
+        id
+      )
+      .single()
+
+
+    if (error) {
+      throw error
+    }
+
+
+    return NextResponse.json(data)
+
+
+  } catch(error) {
+
+    console.error(
+      'GET BOOKING ERROR:',
+      error
+    )
+
+    return NextResponse.json(
+      {
+        error: error.message
+      },
+      {
+        status: 500
+      }
+    )
+
+  }
+}
+
+
+
+
+
+// UPDATE BOOKING STATUS
+export async function PATCH(
+  request,
+  { params }
+) {
 
   try {
+
+    const { id } = await params
+
 
     const session =
       await getServerSession(authOptions)
@@ -25,99 +98,14 @@ export async function GET(
 
       return NextResponse.json(
         {
-          error:'Unauthorized'
+          error: 'Unauthorized'
         },
         {
-          status:403
+          status: 403
         }
       )
 
     }
-
-
-
-    const {
-      data,
-      error
-    } = await supabaseAdmin
-      .from('bookings')
-      .select('*')
-      .eq(
-        'id',
-        params.id
-      )
-      .single()
-
-
-
-    if(error){
-
-      throw error
-
-    }
-
-
-
-    return NextResponse.json(data)
-
-
-
-  } catch(error) {
-
-
-    console.error(
-      'GET BOOKING ERROR:',
-      error
-    )
-
-
-    return NextResponse.json(
-      {
-        error:error.message
-      },
-      {
-        status:500
-      }
-    )
-
-
-  }
-
-}
-
-
-
-
-
-// UPDATE BOOKING STATUS
-export async function PATCH(
-  request,
-  { params }
-){
-
-  try {
-
-    const session =
-      await getServerSession(authOptions)
-
-
-
-    if(
-      !session?.user ||
-      session.user.role !== 'admin'
-    ){
-
-      return NextResponse.json(
-        {
-          error:'Unauthorized'
-        },
-        {
-          status:403
-        }
-      )
-
-    }
-
 
 
     const {
@@ -125,15 +113,14 @@ export async function PATCH(
     } = await request.json()
 
 
-
-    if(!status){
+    if (!status) {
 
       return NextResponse.json(
         {
-          error:'Status required'
+          error: 'Status required'
         },
         {
-          status:400
+          status: 400
         }
       )
 
@@ -144,26 +131,22 @@ export async function PATCH(
 
 
     // Get existing booking
-
     const {
-      data:booking,
-      error:bookingError
+      data: booking,
+      error: bookingError
 
     } = await supabaseAdmin
       .from('bookings')
       .select('*')
       .eq(
         'id',
-        params.id
+        id
       )
       .single()
 
 
-
-    if(bookingError){
-
+    if (bookingError) {
       throw bookingError
-
     }
 
 
@@ -171,10 +154,9 @@ export async function PATCH(
 
 
     // Update booking
-
     const {
-      data:updatedBooking,
-      error:updateError
+      data: updatedBooking,
+      error: updateError
 
     } = await supabaseAdmin
       .from('bookings')
@@ -188,17 +170,14 @@ export async function PATCH(
       })
       .eq(
         'id',
-        params.id
+        id
       )
       .select()
       .single()
 
 
-
-    if(updateError){
-
+    if (updateError) {
       throw updateError
-
     }
 
 
@@ -206,13 +185,11 @@ export async function PATCH(
 
 
     // Notification
-
     let title = ''
     let message = ''
 
 
-
-    if(status === 'confirmed'){
+    if (status === 'confirmed') {
 
       title =
         'Bokning bekräftad'
@@ -223,8 +200,7 @@ export async function PATCH(
     }
 
 
-
-    if(status === 'cancelled'){
+    if (status === 'cancelled') {
 
       title =
         'Bokning avbokad'
@@ -235,8 +211,7 @@ export async function PATCH(
     }
 
 
-
-    if(status === 'completed'){
+    if (status === 'completed') {
 
       title =
         'Bokning slutförd'
@@ -249,7 +224,8 @@ export async function PATCH(
 
 
 
-    if(title){
+
+    if (title) {
 
       await createNotification({
 
@@ -267,13 +243,13 @@ export async function PATCH(
 
 
 
+
     return NextResponse.json(
       updatedBooking
     )
 
 
-
-  } catch(error){
+  } catch(error) {
 
 
     console.error(
@@ -284,10 +260,10 @@ export async function PATCH(
 
     return NextResponse.json(
       {
-        error:error.message
+        error: error.message
       },
       {
-        status:500
+        status: 500
       }
     )
 

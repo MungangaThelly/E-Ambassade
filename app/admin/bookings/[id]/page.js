@@ -29,7 +29,7 @@ export default function BookingDetailsPage(){
 
       const res =
         await fetch(
-          `/api/admin/bookings${params.id}`
+          `/api/admin/bookings/${params.id}`
         )
 
 

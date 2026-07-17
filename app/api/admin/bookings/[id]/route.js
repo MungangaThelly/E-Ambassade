@@ -5,6 +5,91 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createNotification } from '@/lib/notifications'
 
 
+
+// GET SINGLE BOOKING
+export async function GET(
+  request,
+  { params }
+) {
+
+  try {
+
+    const session =
+      await getServerSession(authOptions)
+
+
+    if (
+      !session?.user ||
+      session.user.role !== 'admin'
+    ) {
+
+      return NextResponse.json(
+        {
+          error:'Unauthorized'
+        },
+        {
+          status:403
+        }
+      )
+
+    }
+
+
+
+    const {
+      data,
+      error
+    } = await supabaseAdmin
+      .from('bookings')
+      .select('*')
+      .eq(
+        'id',
+        params.id
+      )
+      .single()
+
+
+
+    if(error){
+
+      throw error
+
+    }
+
+
+
+    return NextResponse.json(data)
+
+
+
+  } catch(error) {
+
+
+    console.error(
+      'GET BOOKING ERROR:',
+      error
+    )
+
+
+    return NextResponse.json(
+      {
+        error:error.message
+      },
+      {
+        status:500
+      }
+    )
+
+
+  }
+
+}
+
+
+
+
+
+// UPDATE BOOKING STATUS
 export async function PATCH(
   request,
   { params }
@@ -56,7 +141,9 @@ export async function PATCH(
 
 
 
-    // Get booking first
+
+
+    // Get existing booking
 
     const {
       data:booking,
@@ -82,8 +169,8 @@ export async function PATCH(
 
 
 
-    // Update booking
 
+    // Update booking
 
     const {
       data:updatedBooking,
@@ -117,8 +204,8 @@ export async function PATCH(
 
 
 
-    // Create user notification
 
+    // Notification
 
     let title = ''
     let message = ''
@@ -129,7 +216,6 @@ export async function PATCH(
 
       title =
         'Bokning bekräftad'
-
 
       message =
         `Din bokning för ${booking.service_type} har bekräftats.`
@@ -143,7 +229,6 @@ export async function PATCH(
       title =
         'Bokning avbokad'
 
-
       message =
         `Din bokning för ${booking.service_type} har avbokats.`
 
@@ -156,7 +241,6 @@ export async function PATCH(
       title =
         'Bokning slutförd'
 
-
       message =
         `Din bokning för ${booking.service_type} är klar.`
 
@@ -166,7 +250,6 @@ export async function PATCH(
 
 
     if(title){
-
 
       await createNotification({
 
@@ -178,7 +261,6 @@ export async function PATCH(
         message
 
       })
-
 
     }
 
@@ -192,6 +274,7 @@ export async function PATCH(
 
 
   } catch(error){
+
 
     console.error(
       'ADMIN BOOKING UPDATE ERROR:',
@@ -207,6 +290,7 @@ export async function PATCH(
         status:500
       }
     )
+
 
   }
 

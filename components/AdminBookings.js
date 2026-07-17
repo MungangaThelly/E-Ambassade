@@ -15,7 +15,11 @@ export default function AdminBookings({ bookings }) {
 
   useEffect(() => {
 
-    setItems(bookings)
+    setItems(
+      Array.isArray(bookings)
+        ? bookings
+        : []
+  )
 
   }, [bookings])
 
@@ -50,7 +54,7 @@ export default function AdminBookings({ bookings }) {
 
 
       await axios.patch(
-        `/api/bookings/${id}`,
+        `/api/admin/bookings/${id}`,
         {
           status
         }

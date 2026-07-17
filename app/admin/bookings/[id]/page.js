@@ -5,8 +5,6 @@ import { useParams } from 'next/navigation'
 
 
 export default function BookingDetailsPage(){
-  console.log('ADMIN BOOKING DETAILS PAGE LOADED')
-
   const params = useParams()
 
   const [booking,setBooking] = useState(null)
@@ -31,7 +29,7 @@ export default function BookingDetailsPage(){
 
       const res =
         await fetch(
-          `/api/admin/bookings/${params.id}`
+          `/api/admin/${params.id}`
         )
 
 
@@ -80,7 +78,7 @@ export default function BookingDetailsPage(){
 
       const res =
         await fetch(
-          `/api/admin/bookings/${params.id}`,
+          `/api/admin/${params.id}`,
           {
             method:'PATCH',
             headers:{
@@ -156,19 +154,16 @@ export default function BookingDetailsPage(){
   const status =
     booking.status?.trim().toLowerCase()
 
-    console.log('BOOKING STATUS:', {
-      original: booking.status,
-      cleaned: status,
-      type: typeof booking.status
-    })
-
 
 
 
   return (
 
     <div>
-
+      
+      <h1>
+      ADMIN BOOKING PAGE WORKING
+      </h1>
 
       <h1 className="
         text-3xl

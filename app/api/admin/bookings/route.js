@@ -4,6 +4,8 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { getAllBookings } from '@/lib/bookings'
 
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(){
 
   try {

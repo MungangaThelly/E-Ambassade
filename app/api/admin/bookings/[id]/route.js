@@ -4,6 +4,11 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createNotification } from '@/lib/notifications'
 import { resend } from '@/lib/resend'
+import { render } from '@react-email/render'
+
+import BookingConfirmed from '@/lib/emails/BookingConfirmed'
+import BookingCancelled from '@/lib/emails/BookingCancelled'
+import BookingCompleted from '@/lib/emails/BookingCompleted'
 
 
 // GET SINGLE BOOKING
@@ -269,79 +274,67 @@ export async function PATCH(
 
     // SEND EMAIL USING RESEND
     if (
-      status === 'confirmed' ||
-      status === 'cancelled'
+      [
+        'confirmed',
+        'cancelled',
+        'completed'
+      ].includes(status)
     ) {
-
 
       try {
 
-
-        const subject =
-          status === 'confirmed'
-            ? 'Booking confirmed - E-Ambassade'
-            : 'Booking cancelled - E-Ambassade'
+        let EmailComponent = null
+        let subject = ''
 
 
-
-        const html =
-          status === 'confirmed'
-            ? `
-
-              <h2>Hello ${booking.full_name}</h2>
-
-              <p>
-                Your booking has been confirmed.
-              </p>
+        switch (status) {
 
 
-              <p>
-                <strong>Service:</strong>
-                ${booking.service_type}
-              </p>
+          case 'confirmed':
+
+            EmailComponent =
+              BookingConfirmed
+
+            subject =
+              'Booking confirmed - E-Ambassade'
+
+            break
 
 
-              <p>
-                <strong>Date:</strong>
-                ${booking.appointment_date}
-              </p>
+
+          case 'cancelled':
+
+            EmailComponent =
+              BookingCancelled
+
+            subject =
+              'Booking cancelled - E-Ambassade'
+
+            break
 
 
-              <p>
-                <strong>Time:</strong>
-                ${booking.appointment_time}
-              </p>
+
+          case 'completed':
+
+            EmailComponent =
+              BookingCompleted
+
+            subject =
+              'Appointment completed - E-Ambassade'
+
+            break
 
 
-              <p>
-                Thank you.
-              </p>
-
-            `
-            :
-            `
-
-              <h2>Hello ${booking.full_name}</h2>
+        }
 
 
-              <p>
-                Your booking has been cancelled.
-              </p>
 
-
-              <p>
-                <strong>Service:</strong>
-                ${booking.service_type}
-              </p>
-
-
-              <p>
-                If you have questions, please contact us.
-              </p>
-
-            `
-
-
+        const emailHtml =
+          await render(
+            <EmailComponent
+              booking={booking}
+            />
+          )
 
 
 
@@ -358,7 +351,8 @@ export async function PATCH(
           subject,
 
 
-          html
+          html:
+            emailHtml
 
         })
 
@@ -372,17 +366,10 @@ export async function PATCH(
           emailError
         )
 
-        // Booking update remains successful
-        // even if email fails
 
       }
 
-
     }
-
-
-
-
 
 
     return NextResponse.json(

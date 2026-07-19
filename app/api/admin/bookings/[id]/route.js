@@ -3,26 +3,32 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createNotification } from '@/lib/notifications'
+import { resend } from '@/lib/resend'
 
 
 // GET SINGLE BOOKING
 export const dynamic = 'force-dynamic'
 
+
 export async function GET(
   request,
   { params }
 ) {
+
   try {
 
     const { id } = await params
 
+
     const session =
       await getServerSession(authOptions)
+
 
     if (
       !session?.user ||
       session.user.role !== 'admin'
     ) {
+
       return NextResponse.json(
         {
           error: 'Unauthorized'
@@ -31,6 +37,7 @@ export async function GET(
           status: 403
         }
       )
+
     }
 
 
@@ -62,6 +69,7 @@ export async function GET(
       error
     )
 
+
     return NextResponse.json(
       {
         error: error.message
@@ -72,6 +80,7 @@ export async function GET(
     )
 
   }
+
 }
 
 
@@ -110,9 +119,11 @@ export async function PATCH(
     }
 
 
+
     const {
       status
     } = await request.json()
+
 
 
     if (!status) {
@@ -147,6 +158,7 @@ export async function PATCH(
       .single()
 
 
+
     if (bookingError) {
       throw bookingError
     }
@@ -178,6 +190,7 @@ export async function PATCH(
       .single()
 
 
+
     if (updateError) {
       throw updateError
     }
@@ -186,9 +199,10 @@ export async function PATCH(
 
 
 
-    // Notification
+    // Create notification
     let title = ''
     let message = ''
+
 
 
     if (status === 'confirmed') {
@@ -196,10 +210,12 @@ export async function PATCH(
       title =
         'Bokning bekräftad'
 
+
       message =
         `Din bokning för ${booking.service_type} har bekräftats.`
 
     }
+
 
 
     if (status === 'cancelled') {
@@ -207,16 +223,19 @@ export async function PATCH(
       title =
         'Bokning avbokad'
 
+
       message =
         `Din bokning för ${booking.service_type} har avbokats.`
 
     }
 
 
+
     if (status === 'completed') {
 
       title =
         'Bokning slutförd'
+
 
       message =
         `Din bokning för ${booking.service_type} är klar.`
@@ -246,9 +265,130 @@ export async function PATCH(
 
 
 
+
+
+    // SEND EMAIL USING RESEND
+    if (
+      status === 'confirmed' ||
+      status === 'cancelled'
+    ) {
+
+
+      try {
+
+
+        const subject =
+          status === 'confirmed'
+            ? 'Booking confirmed - E-Ambassade'
+            : 'Booking cancelled - E-Ambassade'
+
+
+
+        const html =
+          status === 'confirmed'
+            ? `
+
+              <h2>Hello ${booking.full_name}</h2>
+
+              <p>
+                Your booking has been confirmed.
+              </p>
+
+
+              <p>
+                <strong>Service:</strong>
+                ${booking.service_type}
+              </p>
+
+
+              <p>
+                <strong>Date:</strong>
+                ${booking.appointment_date}
+              </p>
+
+
+              <p>
+                <strong>Time:</strong>
+                ${booking.appointment_time}
+              </p>
+
+
+              <p>
+                Thank you.
+              </p>
+
+            `
+            :
+            `
+
+              <h2>Hello ${booking.full_name}</h2>
+
+
+              <p>
+                Your booking has been cancelled.
+              </p>
+
+
+              <p>
+                <strong>Service:</strong>
+                ${booking.service_type}
+              </p>
+
+
+              <p>
+                If you have questions, please contact us.
+              </p>
+
+            `
+
+
+
+
+
+        await resend.emails.send({
+
+          from:
+            'E-Ambassade <noreply@e-ambassade.nuhar.se>',
+
+
+          to:
+            booking.email,
+
+
+          subject,
+
+
+          html
+
+        })
+
+
+
+      } catch(emailError) {
+
+
+        console.error(
+          'RESEND EMAIL ERROR:',
+          emailError
+        )
+
+        // Booking update remains successful
+        // even if email fails
+
+      }
+
+
+    }
+
+
+
+
+
+
     return NextResponse.json(
       updatedBooking
     )
+
 
 
   } catch(error) {

@@ -15,13 +15,12 @@ export default function SignInPage() {
 
   useEffect(() => {
     if (session?.user) {
-      // Small delay to ensure session is properly stored
-      const timer = setTimeout(() => {
-        router.push('/dashboard')
-      }, 100)
-      return () => clearTimeout(timer)
+      // Use window.location for immediate redirect
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 200)
     }
-  }, [session, router])
+  }, [session])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -38,7 +37,8 @@ export default function SignInPage() {
       if (result?.error) {
         setError(result.error)
       } else {
-        router.push('/dashboard')
+        // Use window.location for immediate redirect
+        window.location.href = '/dashboard'
       }
     } catch (error) {
       setError('Ett fel uppstod vid inloggning')

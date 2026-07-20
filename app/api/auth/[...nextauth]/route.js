@@ -3,6 +3,11 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { loginUser } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
+const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET
+
+if (!secret && process.env.NODE_ENV === 'production') {
+  throw new Error('NEXTAUTH_SECRET is not set in production!')
+}
 
 export const authOptions = {
 
@@ -180,7 +185,7 @@ export const authOptions = {
   },
 
   jwt: {
-    secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+    secret: secret,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
@@ -209,8 +214,7 @@ export const authOptions = {
 
 
   secret:
-    process.env.NEXTAUTH_SECRET ||
-    process.env.AUTH_SECRET,
+    secret,
 
 
   trustHost:

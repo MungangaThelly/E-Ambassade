@@ -1,10 +1,16 @@
 import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
 
+const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET
+
+if (!secret) {
+  console.error('[MIDDLEWARE] WARNING: No NEXTAUTH_SECRET or AUTH_SECRET set!')
+}
+
 export async function middleware(request) {
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+    secret: secret,
   })
 
   // Log for debugging

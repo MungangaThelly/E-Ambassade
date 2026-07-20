@@ -31,18 +31,17 @@ export default function SignInPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false,
+        redirect: true,
+        callbackUrl: '/dashboard'
       })
-
+      
+      // signIn with redirect: true should handle the redirect
       if (result?.error) {
         setError(result.error)
-      } else {
-        // Use window.location for immediate redirect
-        window.location.href = '/dashboard'
+        setLoading(false)
       }
     } catch (error) {
       setError('Ett fel uppstod vid inloggning')
-    } finally {
       setLoading(false)
     }
   }

@@ -31,16 +31,23 @@ export default function SignInPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: true,
-        callbackUrl: '/dashboard'
+        redirect: false, // Handle redirect manually for better control
       })
-      
-      // signIn with redirect: true should handle the redirect
+
+      console.log('[SIGNIN PAGE] signIn result:', result)
+
       if (result?.error) {
         setError(result.error)
         setLoading(false)
+      } else if (result?.ok) {
+        // Wait a bit for session to be stored
+        console.log('[SIGNIN PAGE] Auth successful, waiting for session...')
+        setTimeout(() => {
+          window.location.href = '/dashboard'
+        }, 500)
       }
     } catch (error) {
+      console.error('[SIGNIN PAGE] Error:', error)
       setError('Ett fel uppstod vid inloggning')
       setLoading(false)
     }

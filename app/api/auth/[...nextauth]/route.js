@@ -31,6 +31,7 @@ export const authOptions = {
 
         try {
 
+          console.log('[AUTHORIZE] Attempting to authenticate:', credentials.email)
 
           const { session } =
             await loginUser(
@@ -38,10 +39,11 @@ export const authOptions = {
               credentials.password
             )
 
-
+          console.log('[AUTHORIZE] Login result - session exists:', !!session, 'user exists:', !!session?.user)
 
           if (session?.user) {
 
+            console.log('[AUTHORIZE] User found:', session.user.email, 'ID:', session.user.id)
 
             // Get latest role from profiles table
 
@@ -68,7 +70,7 @@ export const authOptions = {
 
             }
 
-
+            console.log('[AUTHORIZE] Returning user with role:', profile?.role || 'user')
 
             return {
 
@@ -95,6 +97,7 @@ export const authOptions = {
 
           }
 
+          console.log('[AUTHORIZE] No session/user found')
 
           return null
 
@@ -104,7 +107,7 @@ export const authOptions = {
 
 
           console.error(
-            'Auth error:',
+            '[AUTHORIZE] Auth error:',
             error
           )
 

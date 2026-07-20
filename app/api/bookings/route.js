@@ -98,20 +98,35 @@ export async function POST(request) {
     if (process.env.RESEND_API_KEY) {
       try {
         console.log('[BOOKING] RESEND_API_KEY is set, attempting to send confirmation email')
+        
         const { getResend } = await import('@/lib/resend')
+        console.log('[BOOKING] getResend imported successfully')
+        
         const resend = getResend()
-        const BookingConfirmed = (await import('@/lib/emails/BookingConfirmed')).default
+        console.log('[BOOKING] Resend instance retrieved, type:', typeof resend, 'has emails:', !!resend?.emails)
+        
+        const { default: BookingConfirmed } = await import('@/lib/emails/BookingConfirmed')
+        console.log('[BOOKING] BookingConfirmed imported, type:', typeof BookingConfirmed)
+        
+        const emailComponent = BookingConfirmed({ booking })
+        console.log('[BOOKING] Email component created, type:', typeof emailComponent)
         
         const emailResult = await resend.emails.send({
           from: 'noreply@e-ambassade.se',
           to: body.email,
           subject: 'Bokningsbekräftelse - E-Ambassade',
-          react: BookingConfirmed({ booking })
+          react: emailComponent
         })
         
-        console.log('[BOOKING] Confirmation email sent:', emailResult)
+        console.log('[BOOKING] Confirmation email sent successfully:', emailResult?.id || emailResult)
       } catch(emailError) {
-        console.error('[BOOKING] EMAIL SEND ERROR:', emailError?.message || emailError, emailError)
+        console.error('[BOOKING] EMAIL SEND ERROR:', {
+          message: emailError?.message,
+          stack: emailError?.stack,
+          name: emailError?.name,
+          code: emailError?.code,
+          toString: String(emailError)
+        })
       }
     } else {
       console.log('[BOOKING] RESEND_API_KEY not set - email not sent')

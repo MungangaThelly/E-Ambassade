@@ -31,7 +31,7 @@ export default function SignInPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false, // Handle redirect manually for better control
+        redirect: false,
       })
 
       console.log('[SIGNIN PAGE] signIn result:', result)
@@ -40,11 +40,11 @@ export default function SignInPage() {
         setError(result.error)
         setLoading(false)
       } else if (result?.ok) {
-        // Wait a bit for session to be stored
-        console.log('[SIGNIN PAGE] Auth successful, waiting for session...')
+        // Do a full page reload to ensure cookie is properly set
+        console.log('[SIGNIN PAGE] Auth successful, reloading page...')
         setTimeout(() => {
-          window.location.href = '/dashboard'
-        }, 500)
+          window.location.reload()
+        }, 300)
       }
     } catch (error) {
       console.error('[SIGNIN PAGE] Error:', error)

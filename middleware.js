@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 export async function middleware(request) {
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   })
 
   // Protect admin routes

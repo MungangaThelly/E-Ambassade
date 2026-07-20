@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { updateBookingStatus } from '@/lib/bookings'
+import { updateBookingStatus, getBookings } from '@/lib/bookings'
 import { createNotification } from '@/lib/notifications'
+import { resend } from '@/lib/resend'
+import BookingConfirmed from '@/lib/emails/BookingConfirmed'
+import BookingCompleted from '@/lib/emails/BookingCompleted'
+import BookingCancelled from '@/lib/emails/BookingCancelled'
 
 
 export async function PATCH(request, { params }) {
@@ -133,6 +137,62 @@ export async function PATCH(request, { params }) {
         message
 
       })
+
+
+      // SEND STATUS UPDATE EMAIL
+
+      try {
+
+        let emailTemplate = null
+
+        let emailSubject = ''
+
+
+        if(status === 'confirmed') {
+
+          emailTemplate = BookingConfirmed({ booking })
+
+          emailSubject = 'Bokning bekräftad - E-Ambassade'
+
+        } else if(status === 'completed') {
+
+          emailTemplate = BookingCompleted({ booking })
+
+          emailSubject = 'Bokning genomförd - E-Ambassade'
+
+        } else if(status === 'cancelled') {
+
+          emailTemplate = BookingCancelled({ booking })
+
+          emailSubject = 'Bokning avbokad - E-Ambassade'
+
+        }
+
+
+        if(emailTemplate) {
+
+          await resend.emails.send({
+
+            from: 'noreply@e-ambassade.se',
+
+            to: booking.email,
+
+            subject: emailSubject,
+
+            react: emailTemplate
+
+          })
+
+        }
+
+      } catch(emailError) {
+
+        console.error(
+          'EMAIL SEND ERROR:',
+          emailError
+        )
+
+      }
 
 
     }

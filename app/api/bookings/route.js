@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { createBooking, getBookings } from '@/lib/bookings'
 import { createNotification } from '@/lib/notifications'
+import { resend } from '@/lib/resend'
+import BookingConfirmed from '@/lib/emails/BookingConfirmed'
 
 
 export async function POST(request) {
@@ -93,6 +95,30 @@ export async function POST(request) {
     })
 
 
+    // SEND CONFIRMATION EMAIL
+
+    try {
+
+      await resend.emails.send({
+
+        from: 'noreply@e-ambassade.se',
+
+        to: body.email,
+
+        subject: 'Bokningsbekräftelse - E-Ambassade',
+
+        react: BookingConfirmed({ booking })
+
+      })
+
+    } catch(emailError) {
+
+      console.error(
+        'EMAIL SEND ERROR:',
+        emailError
+      )
+
+    }
 
 
     return NextResponse.json(

@@ -11,12 +11,21 @@ if (!secret) {
 const cookieName = `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.session-token`
 
 export async function middleware(request) {
-  const token = await getToken({
+  // Try to get token using getToken
+  let token = await getToken({
     req: request,
     secret: secret,
     raw: false,
-    cookieName: cookieName,
   })
+
+  // If getToken fails, try reading the cookie directly
+  if (!token) {
+    const cookieValue = request.cookies.get(cookieName)?.value
+    console.log(`[MIDDLEWARE] Cookie lookup for "${cookieName}": ${cookieValue ? 'found' : 'not found'}`)
+    if (cookieValue) {
+      console.log(`[MIDDLEWARE] Found cookie, but getToken returned null. Cookie value starts with: ${cookieValue.substring(0, 20)}...`)
+    }
+  }
 
   // Log for debugging
   const pathname = request.nextUrl.pathname

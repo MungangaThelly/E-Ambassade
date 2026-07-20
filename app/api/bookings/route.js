@@ -105,7 +105,7 @@ export async function POST(request) {
           from: 'noreply@e-ambassade.se',
           to: body.email,
           subject: 'Bokningsbekräftelse - E-Ambassade',
-          react: <BookingConfirmed booking={booking} />
+          react: BookingConfirmed({ booking })
         })
         
         console.log('[BOOKING] Confirmation email sent:', emailResult)

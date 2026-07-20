@@ -166,7 +166,7 @@ export async function PATCH(request, { params }) {
               subject: emailSubject,
               react: emailTemplate
             })
-            console.log(`[BOOKING_UPDATE] ${status.toUpperCase()} email sent:`, emailResult)
+            console.log(`[BOOKING_UPDATE] ${status.toUpperCase()} email sent successfully:`, emailResult.id)
           }
         } catch(emailError) {
           console.error(

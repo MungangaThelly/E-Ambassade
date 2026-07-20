@@ -103,29 +103,38 @@ export async function POST(request) {
         console.log('[BOOKING] getResend imported successfully')
         
         const resend = getResend()
-        console.log('[BOOKING] Resend instance retrieved, type:', typeof resend, 'has emails:', !!resend?.emails)
+        console.log('[BOOKING] Resend instance retrieved')
         
-        const { default: BookingConfirmed } = await import('@/lib/emails/BookingConfirmed')
-        console.log('[BOOKING] BookingConfirmed imported, type:', typeof BookingConfirmed)
-        
-        const emailComponent = BookingConfirmed({ booking })
-        console.log('[BOOKING] Email component created, type:', typeof emailComponent)
+        // Use simple HTML instead of React component for now
+        const htmlContent = `
+        <h1>Bokningsbekräftelse</h1>
+        <p>Hej ${booking.full_name},</p>
+        <p>Din bokning har bekräftats!</p>
+        <hr />
+        <p><strong>Bokningsdetaljer:</strong></p>
+        <ul>
+          <li>Tjänsttyp: ${booking.service_type}</li>
+          <li>Datum: ${booking.appointment_date}</li>
+          <li>Tid: ${booking.appointment_time}</li>
+          <li>E-post: ${booking.email}</li>
+          <li>Telefon: ${booking.phone}</li>
+        </ul>
+        <p>Vi ses snart!</p>
+        `
         
         const emailResult = await resend.emails.send({
           from: 'noreply@e-ambassade.se',
           to: body.email,
           subject: 'Bokningsbekräftelse - E-Ambassade',
-          react: emailComponent
+          html: htmlContent
         })
         
-        console.log('[BOOKING] Confirmation email sent successfully:', emailResult?.id || emailResult)
+        console.log('[BOOKING] Confirmation email sent successfully, ID:', emailResult?.id)
       } catch(emailError) {
         console.error('[BOOKING] EMAIL SEND ERROR:', {
           message: emailError?.message,
-          stack: emailError?.stack,
-          name: emailError?.name,
-          code: emailError?.code,
-          toString: String(emailError)
+          stack: emailError?.stack?.substring(0, 200),
+          name: emailError?.name
         })
       }
     } else {

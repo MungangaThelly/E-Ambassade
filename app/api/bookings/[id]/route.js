@@ -143,38 +143,55 @@ export async function PATCH(request, { params }) {
           const { getResend } = await import('@/lib/resend')
           const resend = getResend()
           
-          let emailTemplate = null
           let emailSubject = ''
-          let EmailComponent = null
+          let emailTitle = ''
+          let emailMessage = ''
+          let colorClass = 'bg-blue-900'
 
           if(status === 'confirmed') {
-            EmailComponent = (await import('@/lib/emails/BookingConfirmed')).default
-            emailTemplate = EmailComponent({ booking })
             emailSubject = 'Bokning bekräftad - E-Ambassade'
+            emailTitle = 'Din bokning är bekräftad!'
+            emailMessage = 'Vi ser fram emot att träffa dig på det planerade tillfället.'
+            colorClass = 'bg-green-900'
           } else if(status === 'completed') {
-            EmailComponent = (await import('@/lib/emails/BookingCompleted')).default
-            emailTemplate = EmailComponent({ booking })
             emailSubject = 'Bokning genomförd - E-Ambassade'
+            emailTitle = 'Tack för mötet!'
+            emailMessage = 'Vi hoppas vi fick en bra kontakt med dig. Kontakta oss gärna igen.'
+            colorClass = 'bg-blue-900'
           } else if(status === 'cancelled') {
-            EmailComponent = (await import('@/lib/emails/BookingCancelled')).default
-            emailTemplate = EmailComponent({ booking })
             emailSubject = 'Bokning avbokad - E-Ambassade'
+            emailTitle = 'Din bokning har avbokats'
+            emailMessage = 'Din tidigare bokning är nu avbokad. Tveka inte att kontakta oss om du vill boka ett nytt tillfälle.'
+            colorClass = 'bg-red-900'
           }
 
-          if(emailTemplate) {
-            const emailResult = await resend.emails.send({
-              from: 'noreply@e-ambassade.se',
-              to: booking.email,
-              subject: emailSubject,
-              react: emailTemplate
-            })
-            console.log(`[BOOKING_UPDATE] ${status.toUpperCase()} email sent successfully:`, emailResult.id)
-          }
+          const htmlContent = `
+          <h1 style="color: white; background: ${colorClass === 'bg-green-900' ? 'green' : colorClass === 'bg-red-900' ? 'red' : 'darkblue'}; padding: 20px; margin: 0;">E-Ambassade</h1>
+          <h2>${emailTitle}</h2>
+          <p>Hej ${booking.full_name},</p>
+          <p>${emailMessage}</p>
+          <hr />
+          <p><strong>Bokningsdetaljer:</strong></p>
+          <ul>
+            <li>Tjänsttyp: ${booking.service_type}</li>
+            <li>Datum: ${booking.appointment_date}</li>
+            <li>Tid: ${booking.appointment_time}</li>
+            <li>Status: ${status}</li>
+          </ul>
+          <p>Med vänlig hälsning,<br/>E-Ambassade</p>
+          `
+
+          const emailResult = await resend.emails.send({
+            from: 'noreply@e-ambassade.se',
+            to: booking.email,
+            subject: emailSubject,
+            html: htmlContent
+          })
+          console.log(`[BOOKING_UPDATE] ${status.toUpperCase()} email sent successfully, ID:`, emailResult?.id)
         } catch(emailError) {
           console.error(
             `[BOOKING_UPDATE] EMAIL SEND ERROR for ${status}:`,
-            emailError?.message || emailError,
-            emailError
+            emailError?.message || emailError?.stack?.substring(0, 100)
           )
         }
       } else {

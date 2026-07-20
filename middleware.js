@@ -67,5 +67,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/dashboard/:path*', '/booking/:path*'],
+  matcher: [], // Temporarily disabled to debug
 }

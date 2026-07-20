@@ -4,7 +4,6 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createNotification } from '@/lib/notifications'
 import { resend } from '@/lib/resend'
-import { render } from '@react-email/render'
 
 import BookingConfirmed from '@/lib/emails/BookingConfirmed'
 import BookingCancelled from '@/lib/emails/BookingCancelled'
@@ -329,30 +328,19 @@ export async function PATCH(
 
 
 
-        const emailHtml =
-          await render(
-            <EmailComponent
-              booking={booking}
-            />
-          )
-
-
-
         await resend.emails.send({
 
           from:
-            'E-Ambassade <noreply@e-ambassade.nuhar.se>',
+            'noreply@e-ambassade.se',
 
 
           to:
             booking.email,
 
+          subject:
+            subject,
 
-          subject,
-
-
-          html:
-            emailHtml
+          react: <EmailComponent booking={booking} />
 
         })
 

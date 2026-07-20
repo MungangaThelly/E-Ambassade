@@ -139,6 +139,21 @@ export async function POST(request) {
     )
 
 
+    // Handle email confirmation requirement
+    if (error.message?.includes('Email not confirmed')) {
+
+      return NextResponse.json(
+        {
+          error: 'Vänligen bekräfta din e-postadress innan du gör en bokning. Kontrollera din e-post för en bekräftelselänk.'
+        },
+        {
+          status: 403
+        }
+      )
+
+    }
+
+
     return NextResponse.json(
       {
         error:error.message

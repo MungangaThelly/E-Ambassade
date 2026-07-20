@@ -3,8 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { createBooking, getBookings } from '@/lib/bookings'
 import { createNotification } from '@/lib/notifications'
-import { resend } from '@/lib/resend'
-import BookingConfirmed from '@/lib/emails/BookingConfirmed'
 
 
 export async function POST(request) {
@@ -95,28 +93,33 @@ export async function POST(request) {
     })
 
 
-    // SEND CONFIRMATION EMAIL
+    // SEND CONFIRMATION EMAIL (Optional - non-blocking)
 
-    try {
+    if (process.env.RESEND_API_KEY) {
 
-      await resend.emails.send({
+      try {
 
-        from: 'noreply@e-ambassade.se',
+        const { resend } = await import('@/lib/resend')
+        const BookingConfirmed = (await import('@/lib/emails/BookingConfirmed')).default
 
-        to: body.email,
+        await resend.emails.send({
 
-        subject: 'Bokningsbekräftelse - E-Ambassade',
+          from: 'noreply@e-ambassade.se',
 
-        react: BookingConfirmed({ booking })
+          to: body.email,
 
-      })
+          subject: 'Bokningsbekräftelse - E-Ambassade',
 
-    } catch(emailError) {
+          react: <BookingConfirmed booking={booking} />
 
-      console.error(
-        'EMAIL SEND ERROR:',
-        emailError
-      )
+        })
+
+      } catch(emailError) {
+
+        // Log but don't block booking
+        console.error('EMAIL SEND ERROR:', emailError?.message || emailError)
+
+      }
 
     }
 

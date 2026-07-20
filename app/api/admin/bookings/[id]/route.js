@@ -271,8 +271,9 @@ export async function PATCH(
 
 
 
-    // SEND EMAIL USING RESEND
+    // SEND EMAIL USING RESEND (Optional - only if API key configured)
     if (
+      process.env.RESEND_API_KEY &&
       [
         'confirmed',
         'cancelled',
@@ -295,7 +296,7 @@ export async function PATCH(
               BookingConfirmed
 
             subject =
-              'Booking confirmed - E-Ambassade'
+              'Bokning bekräftad - E-Ambassade'
 
             break
 
@@ -307,7 +308,7 @@ export async function PATCH(
               BookingCancelled
 
             subject =
-              'Booking cancelled - E-Ambassade'
+              'Bokning avbokad - E-Ambassade'
 
             break
 
@@ -319,7 +320,7 @@ export async function PATCH(
               BookingCompleted
 
             subject =
-              'Appointment completed - E-Ambassade'
+              'Bokning genomförd - E-Ambassade'
 
             break
 
@@ -328,30 +329,32 @@ export async function PATCH(
 
 
 
-        await resend.emails.send({
+        if (EmailComponent) {
 
-          from:
-            'noreply@e-ambassade.se',
+          await resend.emails.send({
 
-
-          to:
-            booking.email,
-
-          subject:
-            subject,
-
-          react: <EmailComponent booking={booking} />
-
-        })
+            from:
+              'noreply@e-ambassade.se',
 
 
+            to:
+              booking.email,
+
+            subject:
+              subject,
+
+            react: <EmailComponent booking={booking} />
+
+          })
+
+        }
 
       } catch(emailError) {
 
-
+        // Log but don't block status update
         console.error(
           'RESEND EMAIL ERROR:',
-          emailError
+          emailError?.message || emailError
         )
 
 

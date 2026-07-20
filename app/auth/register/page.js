@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { registerUser } from '@/lib/auth'
+import { serverRegisterUser } from '@/app/actions/auth'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -30,7 +30,11 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      await registerUser(email, password, name)
+      const result = await serverRegisterUser(email, password, name)
+      if (!result.success) {
+        setError(result.error || 'Registreringen misslyckades')
+        return
+      }
       router.push('/auth/signin')
     } catch (error) {
       setError(error.message || 'Registreringen misslyckades')

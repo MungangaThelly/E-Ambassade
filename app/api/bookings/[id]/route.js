@@ -141,58 +141,42 @@ export async function PATCH(request, { params }) {
 
 
       // SEND STATUS UPDATE EMAIL
+      if (process.env.RESEND_API_KEY) {
+        try {
+          console.log(`[BOOKING_UPDATE] Sending ${status} email to ${booking.email}`)
+          
+          let emailTemplate = null
+          let emailSubject = ''
 
-      try {
+          if(status === 'confirmed') {
+            emailTemplate = BookingConfirmed({ booking })
+            emailSubject = 'Bokning bekräftad - E-Ambassade'
+          } else if(status === 'completed') {
+            emailTemplate = BookingCompleted({ booking })
+            emailSubject = 'Bokning genomförd - E-Ambassade'
+          } else if(status === 'cancelled') {
+            emailTemplate = BookingCancelled({ booking })
+            emailSubject = 'Bokning avbokad - E-Ambassade'
+          }
 
-        let emailTemplate = null
-
-        let emailSubject = ''
-
-
-        if(status === 'confirmed') {
-
-          emailTemplate = BookingConfirmed({ booking })
-
-          emailSubject = 'Bokning bekräftad - E-Ambassade'
-
-        } else if(status === 'completed') {
-
-          emailTemplate = BookingCompleted({ booking })
-
-          emailSubject = 'Bokning genomförd - E-Ambassade'
-
-        } else if(status === 'cancelled') {
-
-          emailTemplate = BookingCancelled({ booking })
-
-          emailSubject = 'Bokning avbokad - E-Ambassade'
-
+          if(emailTemplate) {
+            const emailResult = await resend.emails.send({
+              from: 'noreply@e-ambassade.se',
+              to: booking.email,
+              subject: emailSubject,
+              react: emailTemplate
+            })
+            console.log(`[BOOKING_UPDATE] ${status.toUpperCase()} email sent:`, emailResult)
+          }
+        } catch(emailError) {
+          console.error(
+            `[BOOKING_UPDATE] EMAIL SEND ERROR for ${status}:`,
+            emailError?.message || emailError,
+            emailError
+          )
         }
-
-
-        if(emailTemplate) {
-
-          await resend.emails.send({
-
-            from: 'noreply@e-ambassade.se',
-
-            to: booking.email,
-
-            subject: emailSubject,
-
-            react: emailTemplate
-
-          })
-
-        }
-
-      } catch(emailError) {
-
-        console.error(
-          'EMAIL SEND ERROR:',
-          emailError
-        )
-
+      } else {
+        console.log(`[BOOKING_UPDATE] RESEND_API_KEY not set - ${status} email not sent`)
       }
 
 

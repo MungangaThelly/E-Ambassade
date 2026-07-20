@@ -3,10 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { updateBookingStatus, getBookings } from '@/lib/bookings'
 import { createNotification } from '@/lib/notifications'
-import { resend } from '@/lib/resend'
-import BookingConfirmed from '@/lib/emails/BookingConfirmed'
-import BookingCompleted from '@/lib/emails/BookingCompleted'
-import BookingCancelled from '@/lib/emails/BookingCancelled'
 
 export const dynamic = 'force-dynamic'
 
@@ -144,18 +140,24 @@ export async function PATCH(request, { params }) {
       if (process.env.RESEND_API_KEY) {
         try {
           console.log(`[BOOKING_UPDATE] Sending ${status} email to ${booking.email}`)
+          const { getResend } = await import('@/lib/resend')
+          const resend = getResend()
           
           let emailTemplate = null
           let emailSubject = ''
+          let EmailComponent = null
 
           if(status === 'confirmed') {
-            emailTemplate = BookingConfirmed({ booking })
+            EmailComponent = (await import('@/lib/emails/BookingConfirmed')).default
+            emailTemplate = EmailComponent({ booking })
             emailSubject = 'Bokning bekräftad - E-Ambassade'
           } else if(status === 'completed') {
-            emailTemplate = BookingCompleted({ booking })
+            EmailComponent = (await import('@/lib/emails/BookingCompleted')).default
+            emailTemplate = EmailComponent({ booking })
             emailSubject = 'Bokning genomförd - E-Ambassade'
           } else if(status === 'cancelled') {
-            emailTemplate = BookingCancelled({ booking })
+            EmailComponent = (await import('@/lib/emails/BookingCancelled')).default
+            emailTemplate = EmailComponent({ booking })
             emailSubject = 'Bokning avbokad - E-Ambassade'
           }
 

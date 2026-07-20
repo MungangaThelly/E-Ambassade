@@ -98,7 +98,8 @@ export async function POST(request) {
     if (process.env.RESEND_API_KEY) {
       try {
         console.log('[BOOKING] RESEND_API_KEY is set, attempting to send confirmation email')
-        const { resend } = await import('@/lib/resend')
+        const { getResend } = await import('@/lib/resend')
+        const resend = getResend()
         const BookingConfirmed = (await import('@/lib/emails/BookingConfirmed')).default
         
         const emailResult = await resend.emails.send({

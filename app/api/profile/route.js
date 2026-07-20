@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
+// Force dynamic rendering for this route (uses headers via getServerSession)
+export const dynamic = 'force-dynamic'
 
 export async function GET(){
 

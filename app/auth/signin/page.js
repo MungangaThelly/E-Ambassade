@@ -14,8 +14,12 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (session) {
-      router.push('/dashboard')
+    if (session?.user) {
+      // Small delay to ensure session is properly stored
+      const timer = setTimeout(() => {
+        router.push('/dashboard')
+      }, 100)
+      return () => clearTimeout(timer)
     }
   }, [session, router])
 

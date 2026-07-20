@@ -25,12 +25,15 @@ export async function middleware(request) {
     if (cookieValue) {
       console.log(`[MIDDLEWARE] Found cookie, but getToken returned null. Cookie value starts with: ${cookieValue.substring(0, 20)}...`)
     }
+    // Also check what cookies ARE present
+    const allCookies = request.cookies.getAll()
+    console.log(`[MIDDLEWARE] All cookies present: ${allCookies.map(c => c.name).join(', ')}`)
   }
 
   // Log for debugging
   const pathname = request.nextUrl.pathname
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/booking')) {
-    console.log(`[MIDDLEWARE] Path: ${pathname}, Token exists: ${!!token}`)
+    console.log(`[MIDDLEWARE] Path: ${pathname}, Token exists: ${!!token}, NODE_ENV: ${process.env.NODE_ENV}`)
     if (token) {
       console.log(`[MIDDLEWARE] Token user: ${token.email}, Role: ${token.role}`)
     }

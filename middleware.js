@@ -7,8 +7,8 @@ if (!secret) {
   console.error('[MIDDLEWARE] WARNING: No NEXTAUTH_SECRET or AUTH_SECRET set!')
 }
 
-// Get cookie name based on environment
-const cookieName = `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.session-token`
+// Get cookie name - NextAuth adds __Secure- prefix automatically for secure cookies
+const cookieName = 'next-auth.session-token'
 
 export async function middleware(request) {
   // Try to get token using getToken

@@ -7,9 +7,19 @@ export async function middleware(request) {
     secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   })
 
+  // Log for debugging
+  const pathname = request.nextUrl.pathname
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/booking')) {
+    console.log(`[MIDDLEWARE] Path: ${pathname}, Token exists: ${!!token}`)
+    if (token) {
+      console.log(`[MIDDLEWARE] Token user: ${token.email}, Role: ${token.role}`)
+    }
+  }
+
   // Protect admin routes
   if (request.nextUrl.pathname.startsWith('/admin')) {
     if (!token || token.role !== 'admin') {
+      console.log(`[MIDDLEWARE] Denying admin access - token: ${!!token}, role: ${token?.role}`)
       return NextResponse.redirect(new URL('/auth/signin', request.url))
     }
   }
@@ -17,6 +27,7 @@ export async function middleware(request) {
   // Protect dashboard routes
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
     if (!token) {
+      console.log(`[MIDDLEWARE] Denying dashboard access - no token`)
       return NextResponse.redirect(new URL('/auth/signin', request.url))
     }
   }
@@ -24,6 +35,7 @@ export async function middleware(request) {
   // Protect booking routes
   if (request.nextUrl.pathname.startsWith('/booking')) {
     if (!token) {
+      console.log(`[MIDDLEWARE] Denying booking access - no token`)
       return NextResponse.redirect(new URL('/auth/signin', request.url))
     }
   }

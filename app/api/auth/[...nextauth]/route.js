@@ -131,6 +131,8 @@ export const authOptions = {
 
       if(user){
 
+        console.log('[JWT CALLBACK] Creating token for:', user.email)
+
         token.id =
           user.id
 
@@ -150,6 +152,7 @@ export const authOptions = {
 
     async session({ session, token }) {
 
+      console.log('[SESSION CALLBACK] Creating session for token:', token.email)
 
       session.user.id =
         token.id
@@ -177,7 +180,17 @@ export const authOptions = {
     secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   },
 
-
+  cookies: {
+    sessionToken: {
+      name: `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
 
   pages: {
 

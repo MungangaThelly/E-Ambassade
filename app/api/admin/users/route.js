@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
+export const dynamic = 'force-dynamic'
 
 export async function GET(){
 

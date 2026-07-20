@@ -4,6 +4,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { createBooking, getBookings } from '@/lib/bookings'
 import { createNotification } from '@/lib/notifications'
 
+export const dynamic = 'force-dynamic'
 
 export async function POST(request) {
 

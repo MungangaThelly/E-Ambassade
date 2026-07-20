@@ -8,6 +8,7 @@ import BookingConfirmed from '@/lib/emails/BookingConfirmed'
 import BookingCompleted from '@/lib/emails/BookingCompleted'
 import BookingCancelled from '@/lib/emails/BookingCancelled'
 
+export const dynamic = 'force-dynamic'
 
 export async function PATCH(request, { params }) {
 

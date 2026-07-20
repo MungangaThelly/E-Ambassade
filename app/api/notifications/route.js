@@ -7,6 +7,7 @@ import {
   createNotification
 } from '@/lib/notifications'
 
+export const dynamic = 'force-dynamic'
 
 // GET USER NOTIFICATIONS
 export async function GET(){

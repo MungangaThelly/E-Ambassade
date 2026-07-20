@@ -8,12 +8,17 @@ export default function DashboardPage() {
   const { data: session } = useSession()
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
+  const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    if (session?.user?.id) {
+    setHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (hydrated && session?.user?.id) {
       fetchBookings()
     }
-  }, [session])
+  }, [hydrated, session])
 
   async function fetchBookings() {
     try {
@@ -30,7 +35,7 @@ export default function DashboardPage() {
     }
   }
 
-  if (loading) {
+  if (!hydrated || loading) {
     return <div>Laddar...</div>
   }
 

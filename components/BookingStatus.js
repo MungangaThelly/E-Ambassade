@@ -7,7 +7,7 @@ import { useLanguage } from '@/lib/i18n/language-context'
 export default function BookingStatus({ booking }) {
   const [status, setStatus] = useState(booking.status)
   const [loading, setLoading] = useState(false)
-  const { t, dateLocale } = useLanguage()
+  const { t, dateLocale, locale } = useLanguage()
 
   const statusColors = {
     pending: 'bg-yellow-100 text-yellow-800',
@@ -31,9 +31,17 @@ export default function BookingStatus({ booking }) {
     setLoading(true)
 
     try {
-      await axios.patch(`/api/bookings/${booking.id}`, {
-        status: 'cancelled',
-      })
+      await axios.patch(
+        `/api/bookings/${booking.id}`,
+        {
+          status: 'cancelled',
+        },
+        {
+          headers: {
+            'x-locale': locale,
+          },
+        }
+      )
 
       setStatus('cancelled')
     } catch (error) {

@@ -8,7 +8,7 @@ import { useLanguage } from '@/lib/i18n/language-context'
 export default function BookingForm() {
 
   const router = useRouter()
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
 
   const [formData, setFormData] = useState({
     date: '',
@@ -67,25 +67,24 @@ export default function BookingForm() {
 
     try {
 
-      await axios.post('/api/bookings', {
-
-        appointment_date: formData.date,
-
-        appointment_time: formData.time,
-
-        service_type: formData.serviceType,
-
-        full_name: formData.full_name,
-
-        email: formData.email,
-
-        phone: formData.phone,
-
-        passport_number: formData.passport_number,
-
-        message: formData.notes,
-
-      })
+      await axios.post(
+        '/api/bookings',
+        {
+          appointment_date: formData.date,
+          appointment_time: formData.time,
+          service_type: formData.serviceType,
+          full_name: formData.full_name,
+          email: formData.email,
+          phone: formData.phone,
+          passport_number: formData.passport_number,
+          message: formData.notes,
+        },
+        {
+          headers: {
+            'x-locale': locale,
+          },
+        }
+      )
 
 
       setFormData({

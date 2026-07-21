@@ -6,13 +6,16 @@ import {
   markNotificationRead,
   createNotification
 } from '@/lib/notifications'
+import { getRequestLocale, serverT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
 // GET USER NOTIFICATIONS
-export async function GET(){
+export async function GET(request){
 
   try {
+
+    const locale = getRequestLocale(request)
 
     const session =
       await getServerSession(authOptions)
@@ -22,7 +25,7 @@ export async function GET(){
 
       return NextResponse.json(
         {
-          error:'Unauthorized'
+          error:serverT(locale, 'api.unauthorized')
         },
         {
           status:401
@@ -72,6 +75,8 @@ export async function POST(request){
 
   try {
 
+    const locale = getRequestLocale(request)
+
     const session =
       await getServerSession(authOptions)
 
@@ -80,7 +85,7 @@ export async function POST(request){
 
       return NextResponse.json(
         {
-          error:'Unauthorized'
+          error:serverT(locale, 'api.unauthorized')
         },
         {
           status:401
@@ -205,6 +210,8 @@ export async function PATCH(request){
 
   try {
 
+    const locale = getRequestLocale(request)
+
     const session =
       await getServerSession(authOptions)
 
@@ -213,7 +220,7 @@ export async function PATCH(request){
 
       return NextResponse.json(
         {
-          error:'Unauthorized'
+          error:serverT(locale, 'api.unauthorized')
         },
         {
           status:401
@@ -227,6 +234,19 @@ export async function PATCH(request){
       id
     } =
     await request.json()
+
+    if(!id){
+
+      return NextResponse.json(
+        {
+          error:serverT(locale, 'api.notificationIdRequired')
+        },
+        {
+          status:400
+        }
+      )
+
+    }
 
 
 

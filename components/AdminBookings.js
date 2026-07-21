@@ -6,7 +6,7 @@ import { useLanguage } from '@/lib/i18n/language-context'
 
 
 export default function AdminBookings({ bookings }) {
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
 
 
   const [items, setItems] = useState([])
@@ -66,6 +66,11 @@ export default function AdminBookings({ bookings }) {
         `/api/admin/bookings/${id}`,
         {
           status
+        },
+        {
+          headers: {
+            'x-locale': locale,
+          },
         }
       )
 

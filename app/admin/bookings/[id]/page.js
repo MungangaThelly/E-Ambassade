@@ -1,37 +1,30 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useLanguage } from '@/lib/i18n/language-context'
 
 
 export default function BookingDetailsPage(){
   const params = useParams()
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
 
   const [booking,setBooking] = useState(null)
   const [loading,setLoading] = useState(true)
   const [updating,setUpdating] = useState(false)
 
-
-
-  useEffect(()=>{
-
-    if(params.id){
-      fetchBooking()
-    }
-
-  },[params.id])
-
-
-
-  async function fetchBooking(){
+  const fetchBooking = useCallback(async function fetchBooking(){
 
     try {
 
       const res =
         await fetch(
-          `/api/admin/bookings/${params.id}`
+          `/api/admin/bookings/${params.id}`,
+          {
+            headers: {
+              'x-locale': locale
+            }
+          }
         )
 
 
@@ -65,7 +58,17 @@ export default function BookingDetailsPage(){
 
     }
 
-  }
+  }, [locale, params.id])
+
+
+
+  useEffect(()=>{
+
+    if(params.id){
+      fetchBooking()
+    }
+
+  },[fetchBooking, params.id])
 
 
 
@@ -84,7 +87,8 @@ export default function BookingDetailsPage(){
           {
             method:'PATCH',
             headers:{
-              'Content-Type':'application/json'
+              'Content-Type':'application/json',
+              'x-locale':locale
             },
             body:JSON.stringify({
               status

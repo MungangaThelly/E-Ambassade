@@ -4,435 +4,186 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createNotification } from '@/lib/notifications'
 import { getResend } from '@/lib/resend'
-
+import { getRequestLocale, getStatusText, serverT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
-
-
-// GET SINGLE BOOKING
-export async function GET(
-  request,
-  { params }
-) {
+export async function GET(request, { params }) {
+  const locale = getRequestLocale(request)
 
   try {
+    const { id } = params
+    const session = await getServerSession(authOptions)
 
-    const { id } = await params
-
-
-    const session =
-      await getServerSession(authOptions)
-
-
-    if (
-      !session?.user ||
-      session.user.role !== 'admin'
-    ) {
-
+    if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json(
         {
-          error: 'Unauthorized'
+          error: serverT(locale, 'api.unauthorized'),
         },
         {
-          status: 403
+          status: 403,
         }
       )
-
     }
 
-
-
-    const {
-      data,
-      error
-    } =
-      await supabaseAdmin
-        .from('bookings')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-
-
-    if (error) {
-      throw error
-    }
-
-
-    return NextResponse.json(data)
-
-
-  } catch(error) {
-
-    console.error(
-      'GET BOOKING ERROR:',
-      error
-    )
-
-
-    return NextResponse.json(
-      {
-        error: error.message
-      },
-      {
-        status:500
-      }
-    )
-
-  }
-
-}
-
-
-
-
-
-// UPDATE BOOKING STATUS
-export async function PATCH(
-  request,
-  { params }
-) {
-
-  try {
-
-
-    const { id } = await params
-
-
-    const session =
-      await getServerSession(authOptions)
-
-
-
-    if (
-      !session?.user ||
-      session.user.role !== 'admin'
-    ) {
-
-      return NextResponse.json(
-        {
-          error:'Unauthorized'
-        },
-        {
-          status:403
-        }
-      )
-
-    }
-
-
-
-
-
-    const {
-      status
-    } =
-      await request.json()
-
-
-
-    if(!status){
-
-      return NextResponse.json(
-        {
-          error:'Status required'
-        },
-        {
-          status:400
-        }
-      )
-
-    }
-
-
-
-
-
-    // Get booking first
-    const {
-      data: booking,
-      error: bookingError
-    }
-    =
-    await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('bookings')
       .select('*')
       .eq('id', id)
       .single()
 
+    if (error) {
+      throw error
+    }
 
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('GET BOOKING ERROR:', error)
 
-    if(bookingError){
+    return NextResponse.json(
+      {
+        error: error.message || serverT(locale, 'api.internalError'),
+      },
+      {
+        status: 500,
+      }
+    )
+  }
+}
+
+export async function PATCH(request, { params }) {
+  const locale = getRequestLocale(request)
+
+  try {
+    const { id } = params
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user || session.user.role !== 'admin') {
+      return NextResponse.json(
+        {
+          error: serverT(locale, 'api.unauthorized'),
+        },
+        {
+          status: 403,
+        }
+      )
+    }
+
+    const { status } = await request.json()
+
+    if (!status) {
+      return NextResponse.json(
+        {
+          error: serverT(locale, 'api.statusRequired'),
+        },
+        {
+          status: 400,
+        }
+      )
+    }
+
+    const { data: booking, error: bookingError } = await supabaseAdmin
+      .from('bookings')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (bookingError) {
       throw bookingError
     }
 
-
-
-
-
-
-
-    // Update booking
-    const {
-      data: updatedBooking,
-      error:updateError
-    }
-    =
-    await supabaseAdmin
+    const { data: updatedBooking, error: updateError } = await supabaseAdmin
       .from('bookings')
       .update({
-
         status,
-
-        updated_at:
-          new Date().toISOString()
-
+        updated_at: new Date().toISOString(),
       })
-      .eq('id',id)
+      .eq('id', id)
       .select()
       .single()
 
-
-
-    if(updateError){
+    if (updateError) {
       throw updateError
     }
 
-
-
-
-
-
-
-    // Notification
-    let title = ''
-    let message = ''
-
-
-
-    if(status === 'confirmed'){
-
-      title =
-        'Bokning bekräftad'
-
-      message =
-        `Din bokning för ${booking.service_type} har bekräftats.`
-
+    const statusMessageMap = {
+      confirmed: serverT(locale, 'api.bookingConfirmed'),
+      cancelled: serverT(locale, 'api.bookingCancelled'),
+      completed: serverT(locale, 'api.bookingCompleted'),
     }
 
+    const notificationMessage = statusMessageMap[status]
 
-
-    if(status === 'cancelled'){
-
-      title =
-        'Bokning avbokad'
-
-      message =
-        `Din bokning för ${booking.service_type} har avbokats.`
-
-    }
-
-
-
-    if(status === 'completed'){
-
-      title =
-        'Bokning slutförd'
-
-      message =
-        `Din bokning för ${booking.service_type} är klar.`
-
-    }
-
-
-
-
-
-    if(title){
-
+    if (notificationMessage) {
       await createNotification({
-
-        user_id:
-          booking.user_id,
-
-        title,
-
-        message
-
+        user_id: booking.user_id,
+        title: serverT(locale, 'api.bookingStatusUpdated'),
+        message: notificationMessage,
       })
-
     }
 
-
-
-
-
-
-
-    // SEND EMAIL WITH RESEND
-
-    if(
-      process.env.RESEND_API_KEY &&
-      [
-        'confirmed',
-        'cancelled',
-        'completed'
-      ].includes(status)
-    ){
-
+    if (process.env.RESEND_API_KEY && ['confirmed', 'cancelled', 'completed'].includes(status)) {
       try {
-
-
-        console.log(
-          '[EMAIL] Sending email to:',
-          booking.email
-        )
-
-
-        const resend =
-          getResend()
-
-
+        const resend = getResend()
 
         let subject = ''
+        let title = ''
+        let intro = ''
 
-
-
-        if(status === 'confirmed'){
-
-          subject =
-            'Bokning bekräftad - E-Ambassade'
-
+        if (status === 'confirmed') {
+          subject = serverT(locale, 'email.statusConfirmedSubject')
+          title = serverT(locale, 'email.statusConfirmedTitle')
+          intro = serverT(locale, 'email.statusConfirmedMessage')
         }
 
-
-        if(status === 'cancelled'){
-
-          subject =
-            'Bokning avbokad - E-Ambassade'
-
+        if (status === 'cancelled') {
+          subject = serverT(locale, 'email.statusCancelledSubject')
+          title = serverT(locale, 'email.statusCancelledTitle')
+          intro = serverT(locale, 'email.statusCancelledMessage')
         }
 
-
-        if(status === 'completed'){
-
-          subject =
-            'Bokning genomförd - E-Ambassade'
-
+        if (status === 'completed') {
+          subject = serverT(locale, 'email.statusCompletedSubject')
+          title = serverT(locale, 'email.statusCompletedTitle')
+          intro = serverT(locale, 'email.statusCompletedMessage')
         }
 
-
-
-
-
-        const result =
-          await resend.emails.send({
-
-            from:
-              'E-Ambassade <noreply@e-ambassade.nuhar.se>',
-
-            to:
-              booking.email,
-
-            subject,
-
-            html: `
-
-              <h1>
-                E-Ambassade
-              </h1>
-
-
-              <p>
-                Hej ${booking.full_name}
-              </p>
-
-
-              <p>
-                Din bokningsstatus är:
-                <strong>
-                  ${status}
-                </strong>
-              </p>
-
-
-              <p>
-                Tjänst:
-                ${booking.service_type}
-                <br/>
-
-                Datum:
-                ${booking.appointment_date}
-                <br/>
-
-                Tid:
-                ${booking.appointment_time}
-              </p>
-
-
-              <p>
-                Med vänlig hälsning,
-                <br/>
-                E-Ambassade
-              </p>
-
-            `
-
-          })
-
-
-
-        console.log(
-          '[EMAIL] RESEND RESPONSE:',
-          JSON.stringify(result, null, 2)
-        )
-
-
+        await resend.emails.send({
+          from: 'E-Ambassade <noreply@e-ambassade.nuhar.se>',
+          to: booking.email,
+          subject,
+          html: `
+            <h1>E-Ambassade</h1>
+            <h2>${title}</h2>
+            <p>${serverT(locale, 'email.greeting', { name: booking.full_name })}</p>
+            <p>${intro}</p>
+            <p>
+              ${serverT(locale, 'email.status')}: <strong>${getStatusText(locale, status)}</strong>
+            </p>
+            <p>
+              ${serverT(locale, 'email.serviceType')}: ${booking.service_type}<br/>
+              ${serverT(locale, 'email.date')}: ${booking.appointment_date}<br/>
+              ${serverT(locale, 'email.time')}: ${booking.appointment_time}
+            </p>
+            <p>${serverT(locale, 'email.regards')},<br/>E-Ambassade</p>
+          `,
+        })
+      } catch (emailError) {
+        console.error('[EMAIL] ERROR:', emailError?.message || emailError)
       }
-      catch(emailError){
-
-        console.error(
-          '[EMAIL] ERROR:',
-          emailError?.message || emailError
-        )
-
-      }
-
     }
 
-
-
-
-
-
-
-    return NextResponse.json(
-      updatedBooking
-    )
-
-
-
-
-  }
-  catch(error){
-
-
-    console.error(
-      'ADMIN BOOKING UPDATE ERROR:',
-      error
-    )
-
+    return NextResponse.json(updatedBooking)
+  } catch (error) {
+    console.error('ADMIN BOOKING UPDATE ERROR:', error)
 
     return NextResponse.json(
       {
-        error:error.message
+        error: error.message || serverT(locale, 'api.internalError'),
       },
       {
-        status:500
+        status: 500,
       }
     )
-
   }
-
 }

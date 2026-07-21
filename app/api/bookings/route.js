@@ -3,259 +3,145 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { createBooking, getBookings } from '@/lib/bookings'
 import { createNotification } from '@/lib/notifications'
+import { getRequestLocale, serverT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request) {
+  const locale = getRequestLocale(request)
 
   try {
-
-    const session =
-      await getServerSession(authOptions)
-
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
-
       return NextResponse.json(
         {
-          error:'Not authenticated'
+          error: serverT(locale, 'api.notAuthenticated'),
         },
         {
-          status:401
+          status: 401,
         }
       )
-
     }
 
+    const body = await request.json()
 
-
-    const body =
-      await request.json()
-
-
-
-    const booking =
-      await createBooking({
-
-        user_id:session.user.id,
-
-        service_type:
-          body.service_type,
-
-        appointment_date:
-          body.appointment_date,
-
-        appointment_time:
-          body.appointment_time,
-
-
-        full_name:
-          body.full_name,
-
-
-        email:
-          body.email,
-
-
-        phone:
-          body.phone,
-
-
-        passport_number:
-          body.passport_number,
-
-
-        message:
-          body.message ?? null,
-
-
-        status:'pending'
-
-      })
-
-
-
-
-    // CREATE USER NOTIFICATION
-
-    await createNotification({
-
-      user_id:
-        session.user.id,
-
-
-      title:
-        'Ny bokning skapad',
-
-
-      message:
-        'Din bokning har skickats och väntar på godkännande.'
-
+    const booking = await createBooking({
+      user_id: session.user.id,
+      service_type: body.service_type,
+      appointment_date: body.appointment_date,
+      appointment_time: body.appointment_time,
+      full_name: body.full_name,
+      email: body.email,
+      phone: body.phone,
+      passport_number: body.passport_number,
+      message: body.message ?? null,
+      status: 'pending',
     })
 
+    await createNotification({
+      user_id: session.user.id,
+      title: serverT(locale, 'api.bookingCreatedTitle'),
+      message: serverT(locale, 'api.bookingCreatedMessage'),
+    })
 
-    // SEND CONFIRMATION EMAIL (Optional - non-blocking)
     if (process.env.RESEND_API_KEY) {
       try {
-        console.log('[BOOKING] RESEND_API_KEY is set, attempting to send confirmation email')
-        
         const { getResend } = await import('@/lib/resend')
-        console.log('[BOOKING] getResend imported successfully')
-        
         const resend = getResend()
-        console.log('[BOOKING] Resend instance retrieved')
-        
-        // Use simple HTML instead of React component for now
+
         const htmlContent = `
-        <h1>Bokningsbekräftelse</h1>
-        <p>Hej ${booking.full_name},</p>
-        <p>Din bokning har bekräftats!</p>
+        <h1>${serverT(locale, 'email.confirmationHeading')}</h1>
+        <p>${serverT(locale, 'email.greeting', { name: booking.full_name })}</p>
+        <p>${serverT(locale, 'email.confirmationIntro')}</p>
         <hr />
-        <p><strong>Bokningsdetaljer:</strong></p>
+        <p><strong>${serverT(locale, 'email.detailsTitle')}</strong></p>
         <ul>
-          <li>Tjänsttyp: ${booking.service_type}</li>
-          <li>Datum: ${booking.appointment_date}</li>
-          <li>Tid: ${booking.appointment_time}</li>
-          <li>E-post: ${booking.email}</li>
-          <li>Telefon: ${booking.phone}</li>
+          <li>${serverT(locale, 'email.serviceType')}: ${booking.service_type}</li>
+          <li>${serverT(locale, 'email.date')}: ${booking.appointment_date}</li>
+          <li>${serverT(locale, 'email.time')}: ${booking.appointment_time}</li>
+          <li>${serverT(locale, 'email.email')}: ${booking.email}</li>
+          <li>${serverT(locale, 'email.phone')}: ${booking.phone}</li>
         </ul>
-        <p>Vi ses snart!</p>
+        <p>${serverT(locale, 'email.seeYouSoon')}</p>
         `
-        
-        const emailResult = await resend.emails.send({
+
+        await resend.emails.send({
           from: 'noreply@e-ambassade.se',
           to: body.email,
-          subject: 'Bokningsbekräftelse - E-Ambassade',
-          html: htmlContent
+          subject: serverT(locale, 'email.confirmationSubject'),
+          html: htmlContent,
         })
-        
-        console.log('[BOOKING] Confirmation email sent successfully, ID:', emailResult?.id)
-      } catch(emailError) {
+      } catch (emailError) {
         console.error('[BOOKING] EMAIL SEND ERROR:', {
           message: emailError?.message,
           stack: emailError?.stack?.substring(0, 200),
-          name: emailError?.name
+          name: emailError?.name,
         })
       }
-    } else {
-      console.log('[BOOKING] RESEND_API_KEY not set - email not sent')
     }
-
 
     return NextResponse.json(
       booking,
       {
-        status:201
+        status: 201,
       }
     )
+  } catch (error) {
+    console.error('BOOKING ERROR:', error)
 
-
-
-  } catch(error) {
-
-
-    console.error(
-      'BOOKING ERROR:',
-      error
-    )
-
-
-    // Handle email confirmation requirement
     if (error.message?.includes('Email not confirmed')) {
-
       return NextResponse.json(
         {
-          error: 'Vänligen bekräfta din e-postadress innan du gör en bokning. Kontrollera din e-post för en bekräftelselänk.'
+          error: serverT(locale, 'api.emailConfirmRequired'),
         },
         {
-          status: 403
+          status: 403,
         }
       )
-
     }
-
 
     return NextResponse.json(
       {
-        error:error.message
+        error: error.message || serverT(locale, 'api.internalError'),
       },
       {
-        status:500
+        status: 500,
       }
     )
-
   }
-
 }
 
-
-
-
-
-// GET BOOKINGS FOR DASHBOARD
-
-export async function GET() {
-
+export async function GET(request) {
+  const locale = getRequestLocale(request)
 
   try {
-
-
-    const session =
-      await getServerSession(authOptions)
-
-
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
-
-
       return NextResponse.json(
         {
-          error:'Not authenticated'
+          error: serverT(locale, 'api.notAuthenticated'),
         },
         {
-          status:401
+          status: 401,
         }
       )
-
-
     }
 
+    const bookings = await getBookings(session.user.id)
 
-
-    const bookings =
-      await getBookings(
-        session.user.id
-      )
-
-
-
-    return NextResponse.json(
-      bookings
-    )
-
-
-
-  } catch(error) {
-
-
-    console.error(
-      'GET BOOKINGS ERROR:',
-      error
-    )
-
-
+    return NextResponse.json(bookings)
+  } catch (error) {
+    console.error('GET BOOKINGS ERROR:', error)
 
     return NextResponse.json(
       {
-        error:error.message
+        error: error.message || serverT(locale, 'api.internalError'),
       },
       {
-        status:500
+        status: 500,
       }
     )
-
-
   }
-
-
 }

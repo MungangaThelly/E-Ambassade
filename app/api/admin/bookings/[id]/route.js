@@ -330,7 +330,7 @@ export async function PATCH(
           await resend.emails.send({
 
             from:
-              'noreply@e-ambassade.se',
+              'E-Ambassade <noreply@e-ambassade.nuhar.se>',
 
             to:
               booking.email,

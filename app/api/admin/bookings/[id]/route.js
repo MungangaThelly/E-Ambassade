@@ -384,8 +384,8 @@ export async function PATCH(
 
 
         console.log(
-          '[EMAIL] SENT:',
-          result?.id
+          '[EMAIL] RESEND RESPONSE:',
+          JSON.stringify(result, null, 2)
         )
 
 

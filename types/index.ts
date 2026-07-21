@@ -4,6 +4,7 @@ export interface User {
   email: string;
   name: string;
   role: 'user' | 'admin';
+  preferredLanguage?: 'fr' | 'sv' | 'en';
   createdAt: string;
   updatedAt: string;
 }

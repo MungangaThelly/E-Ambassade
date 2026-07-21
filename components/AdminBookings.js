@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useLanguage } from '@/lib/i18n/language-context'
 
 
 export default function AdminBookings({ bookings }) {
+  const { t } = useLanguage()
 
 
   const [items, setItems] = useState([])
@@ -40,6 +42,13 @@ export default function AdminBookings({ bookings }) {
     cancelled:
       'bg-red-100 text-red-800',
 
+  }
+
+  const statusLabels = {
+    pending: t('booking.status.pending'),
+    confirmed: t('booking.status.confirmed'),
+    completed: t('booking.status.completed'),
+    cancelled: t('booking.status.cancelled'),
   }
 
 
@@ -113,8 +122,7 @@ export default function AdminBookings({ bookings }) {
             rounded-lg
             shadow
           ">
-
-            Inga bokningar hittades.
+            {t('admin.noBookings')}
 
           </div>
 
@@ -162,42 +170,42 @@ export default function AdminBookings({ bookings }) {
 
 
                 <p>
-                  <strong>Namn:</strong>{' '}
-                  {booking.full_name || 'Ej angivet'}
+                  <strong>{t('admin.name')}:</strong>{' '}
+                  {booking.full_name || t('common.notProvided')}
                 </p>
 
 
 
                 <p>
-                  <strong>Email:</strong>{' '}
-                  {booking.email || 'Ej angivet'}
+                  <strong>{t('admin.email')}:</strong>{' '}
+                  {booking.email || t('common.notProvided')}
                 </p>
 
 
 
                 <p>
-                  <strong>Telefon:</strong>{' '}
-                  {booking.phone || 'Ej angivet'}
+                  <strong>{t('admin.phone')}:</strong>{' '}
+                  {booking.phone || t('common.notProvided')}
                 </p>
 
 
 
                 <p>
-                  <strong>Passnummer:</strong>{' '}
+                  <strong>{t('admin.passport')}:</strong>{' '}
                   {booking.passport_number}
                 </p>
 
 
 
                 <p className="mt-3">
-                  <strong>Datum:</strong>{' '}
+                  <strong>{t('admin.date')}:</strong>{' '}
                   {booking.appointment_date}
                 </p>
 
 
 
                 <p>
-                  <strong>Tid:</strong>{' '}
+                  <strong>{t('admin.time')}:</strong>{' '}
                   {booking.appointment_time}
                 </p>
 
@@ -207,8 +215,7 @@ export default function AdminBookings({ bookings }) {
                   booking.message && (
 
                     <p className="mt-3">
-
-                      <strong>Meddelande:</strong>{' '}
+                      <strong>{t('admin.message')}:</strong>{' '}
                       {booking.message}
 
                     </p>
@@ -236,7 +243,7 @@ export default function AdminBookings({ bookings }) {
                   `}
                 >
 
-                  {booking.status}
+                  {statusLabels[booking.status] || booking.status}
 
                 </span>
 
@@ -289,7 +296,7 @@ export default function AdminBookings({ bookings }) {
                       "
 
                     >
-                      Godkänn
+                      {t('admin.approve')}
                     </button>
 
 
@@ -319,7 +326,7 @@ export default function AdminBookings({ bookings }) {
                       "
 
                     >
-                      Avboka
+                      {t('admin.cancel')}
                     </button>
 
 
@@ -362,7 +369,7 @@ export default function AdminBookings({ bookings }) {
 
                   >
 
-                    Slutför
+                    {t('admin.complete')}
 
                   </button>
 

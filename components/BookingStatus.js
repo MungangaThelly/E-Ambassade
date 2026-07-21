@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import axios from 'axios'
+import { useLanguage } from '@/lib/i18n/language-context'
 
 export default function BookingStatus({ booking }) {
   const [status, setStatus] = useState(booking.status)
   const [loading, setLoading] = useState(false)
+  const { t, dateLocale } = useLanguage()
 
   const statusColors = {
     pending: 'bg-yellow-100 text-yellow-800',
@@ -14,8 +16,15 @@ export default function BookingStatus({ booking }) {
     cancelled: 'bg-red-100 text-red-800',
   }
 
+  const localizedStatus = {
+    pending: t('booking.status.pending'),
+    confirmed: t('booking.status.confirmed'),
+    completed: t('booking.status.completed'),
+    cancelled: t('booking.status.cancelled'),
+  }
+
   async function handleCancel() {
-    if (!confirm('Är du säker på att du vill avboka?')) {
+    if (!confirm(t('booking.confirmCancel'))) {
       return
     }
 
@@ -29,7 +38,7 @@ export default function BookingStatus({ booking }) {
       setStatus('cancelled')
     } catch (error) {
       console.error('Failed to cancel booking:', error)
-      alert(error.response?.data?.error || 'Kunde inte avboka bokningen.')
+      alert(error.response?.data?.error || t('booking.cancelFailed'))
     } finally {
       setLoading(false)
     }
@@ -44,7 +53,7 @@ export default function BookingStatus({ booking }) {
           </h3>
 
           <p className="text-gray-600">
-            {new Date(booking.appointment_date).toLocaleDateString('sv-SE')} kl{' '}
+            {new Date(booking.appointment_date).toLocaleDateString(dateLocale)} {t('booking.at')}{' '}
             {booking.appointment_time}
           </p>
 
@@ -61,7 +70,7 @@ export default function BookingStatus({ booking }) {
           </p>
 
           <p className="text-sm text-gray-500">
-            Passnummer: {booking.passport_number}
+            {t('booking.passportLabel')}: {booking.passport_number}
           </p>
         </div>
 
@@ -70,14 +79,14 @@ export default function BookingStatus({ booking }) {
             statusColors[status] || 'bg-gray-100 text-gray-800'
           }`}
         >
-          {status.charAt(0).toUpperCase() + status.slice(1)}
+          {localizedStatus[status] || status}
         </span>
       </div>
 
       {booking.message && (
         <div className="mb-4">
           <p className="text-sm text-gray-600">
-            <strong>Anteckningar:</strong> {booking.message}
+            <strong>{t('booking.notesLabel')}:</strong> {booking.message}
           </p>
         </div>
       )}
@@ -88,7 +97,7 @@ export default function BookingStatus({ booking }) {
           disabled={loading}
           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
         >
-          {loading ? 'Avbokar...' : 'Avboka'}
+          {loading ? t('booking.canceling') : t('booking.cancel')}
         </button>
       )}
     </div>

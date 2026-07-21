@@ -1,18 +1,21 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn, signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { useLanguage } from '@/lib/i18n/language-context'
 
 export default function Navbar() {
   const { data: session } = useSession()
   const [menuOpen, setMenuOpen] = useState(false)
+  const { t } = useLanguage()
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold text-blue-600">
-          e-Ambassade
+          {t('common.appName')}
         </Link>
 
         <button
@@ -25,36 +28,37 @@ export default function Navbar() {
         </button>
 
         <div className={`flex-col md:flex-row md:flex items-center gap-4 ${menuOpen ? 'flex' : 'hidden'} md:block`}>
+          <LanguageSwitcher />
           {session ? (
             <>
               <span className="text-gray-700">
-                Hej, {session.user.name}
+                {t('navbar.greeting', { name: session.user.name })}
               </span>
               <Link href="/dashboard" className="hover:text-blue-600">
-                Dashboard
+                {t('navbar.dashboard')}
               </Link>
               {session.user.role === 'admin' && (
                 <Link href="/admin" className="hover:text-blue-600">
-                  Admin
+                  {t('navbar.admin')}
                 </Link>
               )}
               <button
                 onClick={() => signOut()}
                 className="btn btn-secondary"
               >
-                Logga ut
+                {t('navbar.signOut')}
               </button>
             </>
           ) : (
             <>
               <Link href="/booking" className="hover:text-blue-600">
-                Boka
+                {t('navbar.booking')}
               </Link>
               <Link href="/auth/signin" className="btn btn-primary">
-                Logga in
+                {t('navbar.signIn')}
               </Link>
               <Link href="/auth/register" className="btn btn-secondary">
-                Registrera
+                {t('navbar.register')}
               </Link>
             </>
           )}

@@ -2,12 +2,12 @@
 
 import { useEffect } from 'react'
 import { signIn, useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useLanguage } from '@/lib/i18n/language-context'
 
 export default function SignInPage() {
-  const router = useRouter()
   const { data: session } = useSession()
+  const { t } = useLanguage()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -48,7 +48,7 @@ export default function SignInPage() {
       }
     } catch (error) {
       console.error('[SIGNIN PAGE] Error:', error)
-      setError('Ett fel uppstod vid inloggning')
+      setError(t('auth.signIn.genericError'))
       setLoading(false)
     }
   }
@@ -56,7 +56,7 @@ export default function SignInPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-md">
       <div className="bg-white rounded-lg shadow p-8">
-        <h1 className="text-2xl font-bold mb-6">Logga in</h1>
+        <h1 className="text-2xl font-bold mb-6">{t('auth.signIn.title')}</h1>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -67,7 +67,7 @@ export default function SignInPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              E-post
+              {t('auth.signIn.email')}
             </label>
             <input
               type="email"
@@ -81,7 +81,7 @@ export default function SignInPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Lösenord
+              {t('auth.signIn.password')}
             </label>
             <input
               type="password"
@@ -98,15 +98,15 @@ export default function SignInPage() {
             disabled={loading}
             className="w-full btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Loggar in...' : 'Logga in'}
+            {loading ? t('auth.signIn.loading') : t('auth.signIn.submit')}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-gray-600">
-            Har du inget konto?{' '}
+            {t('auth.signIn.noAccount')}{' '}
             <a href="/auth/register" className="text-blue-600 hover:underline">
-              Registrera dig
+              {t('auth.signIn.register')}
             </a>
           </p>
         </div>

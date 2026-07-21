@@ -5,12 +5,12 @@ import { Providers } from '@/app/providers'
 
 export const metadata = {
   title: 'e-Ambassade',
-  description: 'Din plattform för enkla ambassadörbokningar',
+  description: 'Plateforme de reservation consulaire multilingue',
 }
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="sv">
+    <html lang="fr">
       <body>
         <Providers>
           <Navbar />

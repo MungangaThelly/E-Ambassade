@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import AdminDashboard from '@/components/AdminDashboard'
+import { useLanguage } from '@/lib/i18n/language-context'
 
 export default function AdminPage() {
+  const { t } = useLanguage()
   const [stats, setStats] = useState(null)
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -30,12 +32,12 @@ export default function AdminPage() {
   }
 
   if (loading) {
-    return <div>Laddar...</div>
+    return <div>{t('common.loading')}</div>
   }
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('admin.pageTitle')}</h1>
       {stats && <AdminDashboard
                   stats={stats}
                   bookings={bookings}

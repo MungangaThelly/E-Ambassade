@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useLanguage } from '@/lib/i18n/language-context'
 
 
 export default function ProfilePage(){
+  const { t, dateLocale } = useLanguage()
 
   const [profile,setProfile] = useState(null)
   const [loading,setLoading] = useState(true)
@@ -51,7 +53,7 @@ export default function ProfilePage(){
 
     return (
       <div>
-        Laddar profil...
+        {t('dashboard.profilePage.loading')}
       </div>
     )
 
@@ -63,7 +65,7 @@ export default function ProfilePage(){
 
     return (
       <div>
-        Ingen profil hittades
+        {t('dashboard.profilePage.noProfile')}
       </div>
     )
 
@@ -76,7 +78,7 @@ export default function ProfilePage(){
     <div>
 
       <h1 className="text-3xl font-bold mb-6">
-        Min profil
+        {t('dashboard.profilePage.title')}
       </h1>
 
 
@@ -90,34 +92,34 @@ export default function ProfilePage(){
 
 
         <p>
-          <strong>Namn:</strong>{' '}
+          <strong>{t('dashboard.profilePage.name')}:</strong>{' '}
           {profile.full_name}
         </p>
 
 
         <p>
-          <strong>Email:</strong>{' '}
+          <strong>{t('dashboard.profilePage.email')}:</strong>{' '}
           {profile.email}
         </p>
 
 
         <p>
-          <strong>Telefon:</strong>{' '}
-          {profile.phone || 'Ej angivet'}
+          <strong>{t('dashboard.profilePage.phone')}:</strong>{' '}
+          {profile.phone || t('common.notProvided')}
         </p>
 
 
         <p>
-          <strong>Konto:</strong>{' '}
+          <strong>{t('dashboard.profilePage.account')}:</strong>{' '}
           {profile.role}
         </p>
 
 
         <p>
-          <strong>Skapad:</strong>{' '}
+          <strong>{t('dashboard.profilePage.created')}:</strong>{' '}
           {new Date(
             profile.created_at
-          ).toLocaleDateString('sv-SE')}
+          ).toLocaleDateString(dateLocale)}
         </p>
 
 

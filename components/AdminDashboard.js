@@ -1,9 +1,19 @@
 'use client'
 
+import { useLanguage } from '@/lib/i18n/language-context'
+
 export default function AdminDashboard({
   stats,
   bookings = []
 }) {
+  const { t } = useLanguage()
+
+  const statusLabels = {
+    pending: t('booking.status.pending'),
+    confirmed: t('booking.status.confirmed'),
+    completed: t('booking.status.completed'),
+    cancelled: t('booking.status.cancelled'),
+  }
 
   return (
 
@@ -16,35 +26,35 @@ export default function AdminDashboard({
 
 
         <Card
-          title="Totala bokningar"
+          title={t('admin.totalBookings')}
           value={stats.totalBookings}
           color="text-gray-900"
         />
 
 
         <Card
-          title="Väntande bokningar"
+          title={t('admin.pendingBookings')}
           value={stats.pendingBookings}
           color="text-yellow-600"
         />
 
 
         <Card
-          title="Bekräftade bokningar"
+          title={t('admin.confirmedBookings')}
           value={stats.confirmedBookings || 0}
           color="text-blue-600"
         />
 
 
         <Card
-          title="Genomförda bokningar"
+          title={t('admin.completedBookings')}
           value={stats.completedBookings}
           color="text-green-600"
         />
 
 
         <Card
-          title="Avbokade bokningar"
+          title={t('admin.cancelledBookings')}
           value={stats.cancelledBookings || 0}
           color="text-red-600"
         />
@@ -61,7 +71,7 @@ export default function AdminDashboard({
 
 
         <h2 className="text-xl font-bold mb-6">
-          Senaste bokningar
+          {t('admin.recentBookings')}
         </h2>
 
 
@@ -70,7 +80,7 @@ export default function AdminDashboard({
           bookings.length === 0 ? (
 
             <p className="text-gray-500">
-              Inga bokningar ännu
+              {t('admin.noBookingsYet')}
             </p>
 
           ) : (
@@ -87,22 +97,22 @@ export default function AdminDashboard({
 
 
                     <th className="text-left p-3">
-                      Namn
+                      {t('admin.name')}
                     </th>
 
 
                     <th className="text-left p-3">
-                      Tjänst
+                      {t('admin.service')}
                     </th>
 
 
                     <th className="text-left p-3">
-                      Datum
+                      {t('admin.date')}
                     </th>
 
 
                     <th className="text-left p-3">
-                      Status
+                      {t('admin.status')}
                     </th>
 
 
@@ -156,7 +166,7 @@ export default function AdminDashboard({
                           text-sm
                         ">
 
-                          {booking.status}
+                          {statusLabels[booking.status] || booking.status}
 
                         </span>
 

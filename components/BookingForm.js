@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
+import { useLanguage } from '@/lib/i18n/language-context'
 
 export default function BookingForm() {
 
   const router = useRouter()
+  const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
     date: '',
@@ -22,17 +24,7 @@ export default function BookingForm() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-
-  const serviceTypes = [
-    'Representativ vid event',
-    'Brand ambassadör',
-    'Produktpresentation',
-    'Eventkväll',
-    'Process visa applications',
-    'Process passport applications',
-    'Carte Consulaire',
-    'Annan',
-  ]
+  const serviceTypes = t('booking.services')
 
 
   function handleChange(e) {
@@ -64,7 +56,7 @@ export default function BookingForm() {
       !formData.passport_number
     ) {
 
-      setError('Vänligen fyll i alla obligatoriska fält')
+      setError(t('booking.fillRequired'))
       return
 
     }
@@ -121,13 +113,13 @@ export default function BookingForm() {
 
       if(error.response?.status === 401){
 
-        setError('Du måste logga in först')
+        setError(t('booking.loginRequired'))
 
       } else {
 
         setError(
           error.response?.data?.error ||
-          'Bokningen misslyckades'
+          t('booking.failed')
         )
 
       }
@@ -161,7 +153,7 @@ export default function BookingForm() {
 
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">
-          Namn *
+          {t('booking.fields.fullName')} *
         </label>
 
         <input
@@ -177,7 +169,7 @@ export default function BookingForm() {
 
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">
-          Email *
+          {t('booking.fields.email')} *
         </label>
 
         <input
@@ -193,7 +185,7 @@ export default function BookingForm() {
 
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">
-          Telefon *
+          {t('booking.fields.phone')} *
         </label>
 
         <input
@@ -209,7 +201,7 @@ export default function BookingForm() {
 
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">
-          Passnummer *
+          {t('booking.fields.passport')} *
         </label>
 
         <input
@@ -225,7 +217,7 @@ export default function BookingForm() {
 
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">
-          Datum *
+          {t('booking.fields.date')} *
         </label>
 
         <input
@@ -241,7 +233,7 @@ export default function BookingForm() {
 
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">
-          Tid *
+          {t('booking.fields.time')} *
         </label>
 
         <input
@@ -257,7 +249,7 @@ export default function BookingForm() {
 
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">
-          Tjänsttyp *
+          {t('booking.fields.serviceType')} *
         </label>
 
         <select
@@ -269,7 +261,7 @@ export default function BookingForm() {
         >
 
           <option value="">
-            Välj tjänsttyp
+            {t('booking.selectService')}
           </option>
 
           {serviceTypes.map(type => (
@@ -288,7 +280,7 @@ export default function BookingForm() {
       <div className="mb-6">
 
         <label className="block text-sm font-medium mb-2">
-          Anteckningar
+          {t('booking.fields.notes')}
         </label>
 
         <textarea
@@ -297,7 +289,7 @@ export default function BookingForm() {
           onChange={handleChange}
           rows="4"
           className="w-full px-4 py-2 border rounded-lg"
-          placeholder="Lägg till eventuella anteckningar..."
+          placeholder={t('booking.notesPlaceholder')}
         />
 
       </div>
@@ -309,7 +301,7 @@ export default function BookingForm() {
         className="w-full btn btn-primary disabled:opacity-50"
       >
 
-        {loading ? 'Bokar...' : 'Gör bokning'}
+        {loading ? t('booking.submitLoading') : t('booking.submit')}
 
       </button>
 

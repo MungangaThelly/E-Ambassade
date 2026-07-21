@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useLanguage } from '@/lib/i18n/language-context'
 
 
 export default function BookingDetailsPage(){
   const params = useParams()
+  const { t } = useLanguage()
 
   const [booking,setBooking] = useState(null)
   const [loading,setLoading] = useState(true)
@@ -127,7 +129,7 @@ export default function BookingDetailsPage(){
 
     return (
       <div>
-        Laddar bokning...
+        {t('admin.bookingDetailsLoading')}
       </div>
     )
 
@@ -141,7 +143,7 @@ export default function BookingDetailsPage(){
 
     return (
       <div>
-        Bokning hittades inte.
+        {t('admin.bookingNotFound')}
       </div>
     )
 
@@ -154,23 +156,25 @@ export default function BookingDetailsPage(){
   const status =
     booking.status?.trim().toLowerCase()
 
+  const statusLabels = {
+    pending: t('booking.status.pending'),
+    confirmed: t('booking.status.confirmed'),
+    completed: t('booking.status.completed'),
+    cancelled: t('booking.status.cancelled'),
+  }
+
 
 
 
   return (
 
     <div>
-      
-      <h1>
-      ADMIN BOOKING PAGE WORKING
-      </h1>
-
       <h1 className="
         text-3xl
         font-bold
         mb-6
       ">
-        Bokningsdetaljer
+        {t('admin.bookingDetails')}
       </h1>
 
 
@@ -187,51 +191,51 @@ export default function BookingDetailsPage(){
 
 
         <p>
-          <strong>Tjänst:</strong>{' '}
+          <strong>{t('admin.service')}:</strong>{' '}
           {booking.service_type}
         </p>
 
 
         <p>
-          <strong>Namn:</strong>{' '}
+          <strong>{t('admin.name')}:</strong>{' '}
           {booking.full_name}
         </p>
 
 
         <p>
-          <strong>Email:</strong>{' '}
+          <strong>{t('admin.email')}:</strong>{' '}
           {booking.email}
         </p>
 
 
         <p>
-          <strong>Telefon:</strong>{' '}
+          <strong>{t('admin.phone')}:</strong>{' '}
           {booking.phone}
         </p>
 
 
         <p>
-          <strong>Passnummer:</strong>{' '}
+          <strong>{t('admin.passport')}:</strong>{' '}
           {booking.passport_number}
         </p>
 
 
         <p>
-          <strong>Datum:</strong>{' '}
+          <strong>{t('admin.date')}:</strong>{' '}
           {booking.appointment_date}
         </p>
 
 
         <p>
-          <strong>Tid:</strong>{' '}
+          <strong>{t('admin.time')}:</strong>{' '}
           {booking.appointment_time}
         </p>
 
 
         <p>
-          <strong>Status:</strong>{' '}
+          <strong>{t('admin.status')}:</strong>{' '}
           <span className="font-bold">
-            {booking.status}
+            {statusLabels[status] || booking.status}
           </span>
         </p>
 
@@ -241,16 +245,12 @@ export default function BookingDetailsPage(){
           booking.message && (
 
             <p>
-              <strong>Meddelande:</strong>{' '}
+              <strong>{t('admin.message')}:</strong>{' '}
               {booking.message}
             </p>
 
           )
         }
-        <div className="mt-4 bg-yellow-200 p-4">
-          TEST BUTTON AREA
-        </div>
-
       </div>
 
 
@@ -285,7 +285,7 @@ export default function BookingDetailsPage(){
                   disabled:opacity-50
                 "
               >
-                Godkänn
+                {t('admin.approve')}
               </button>
 
 
@@ -305,7 +305,7 @@ export default function BookingDetailsPage(){
                   disabled:opacity-50
                 "
               >
-                Avboka
+                {t('admin.cancel')}
               </button>
 
 
@@ -335,7 +335,7 @@ export default function BookingDetailsPage(){
                 disabled:opacity-50
               "
             >
-              Slutför
+              {t('admin.complete')}
             </button>
 
           )

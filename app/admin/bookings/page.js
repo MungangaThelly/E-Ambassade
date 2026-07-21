@@ -2,9 +2,11 @@
 
 import { useEffect,useState } from 'react'
 import AdminBookings from '@/components/AdminBookings'
+import { useLanguage } from '@/lib/i18n/language-context'
 
 
 export default function AdminBookingsPage(){
+  const { t } = useLanguage()
 
   const [bookings,setBookings] = useState([])
   const [loading,setLoading] = useState(true)
@@ -51,7 +53,7 @@ export default function AdminBookingsPage(){
 
   if(loading){
 
-    return <div>Laddar bokningar...</div>
+    return <div>{t('admin.loadingBookings')}</div>
 
   }
 
@@ -62,7 +64,7 @@ export default function AdminBookingsPage(){
     <div>
 
       <h1 className="text-3xl font-bold mb-6">
-        Alla bokningar
+        {t('admin.allBookings')}
       </h1>
 
 

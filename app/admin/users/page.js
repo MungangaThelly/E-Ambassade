@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useLanguage } from '@/lib/i18n/language-context'
 
 
 export default function AdminUsersPage() {
+  const { t } = useLanguage()
 
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -54,7 +56,7 @@ export default function AdminUsersPage() {
 
     return (
       <div>
-        Laddar användare...
+        {t('admin.loadingUsers')}
       </div>
     )
 
@@ -68,7 +70,7 @@ export default function AdminUsersPage() {
     <div>
 
       <h1 className="text-3xl font-bold mb-6">
-        Användare
+        {t('admin.usersTitle')}
       </h1>
 
 
@@ -86,7 +88,7 @@ export default function AdminUsersPage() {
           (
 
             <p className="text-gray-600">
-              Inga användare hittades.
+              {t('admin.noUsers')}
             </p>
 
           )
@@ -109,18 +111,18 @@ export default function AdminUsersPage() {
                   >
 
                     <p>
-                      <strong>Namn:</strong>{' '}
+                      <strong>{t('admin.name')}:</strong>{' '}
                       {user.full_name}
                     </p>
 
                     <p>
-                      <strong>Email:</strong>{' '}
+                      <strong>{t('admin.email')}:</strong>{' '}
                       {user.email}
                     </p>
 
 
                     <p>
-                      <strong>Konto:</strong>{' '}
+                      <strong>{t('admin.account')}:</strong>{' '}
                       {user.role}
                     </p>
 

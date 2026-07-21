@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useLanguage } from '@/lib/i18n/language-context'
 
 export default function NotificationBell() {
   const [notificationCount, setNotificationCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
+  const { t } = useLanguage()
 
   return (
     <div className="relative">
@@ -35,11 +37,11 @@ export default function NotificationBell() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50">
           <div className="p-4 border-b">
-            <h3 className="font-bold text-gray-900">Notifikationer</h3>
+            <h3 className="font-bold text-gray-900">{t('notifications.title')}</h3>
           </div>
           <div className="p-4">
             <p className="text-gray-600 text-center">
-              Du har inga nya notifikationer
+              {t('notifications.noNew')}
             </p>
           </div>
         </div>

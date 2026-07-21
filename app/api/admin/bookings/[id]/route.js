@@ -3,17 +3,17 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createNotification } from '@/lib/notifications'
-import { resend } from '@/lib/resend'
+import { getResend } from '@/lib/resend'
 
 import BookingConfirmed from '@/lib/emails/BookingConfirmed'
 import BookingCancelled from '@/lib/emails/BookingCancelled'
 import BookingCompleted from '@/lib/emails/BookingCompleted'
 
 
-// GET SINGLE BOOKING
 export const dynamic = 'force-dynamic'
 
 
+// GET SINGLE BOOKING
 export async function GET(
   request,
   { params }
@@ -51,10 +51,7 @@ export async function GET(
     } = await supabaseAdmin
       .from('bookings')
       .select('*')
-      .eq(
-        'id',
-        id
-      )
+      .eq('id', id)
       .single()
 
 
@@ -146,19 +143,14 @@ export async function PATCH(
 
 
 
-
-    // Get existing booking
+    // Get current booking
     const {
       data: booking,
       error: bookingError
-
     } = await supabaseAdmin
       .from('bookings')
       .select('*')
-      .eq(
-        'id',
-        id
-      )
+      .eq('id', id)
       .single()
 
 
@@ -175,21 +167,13 @@ export async function PATCH(
     const {
       data: updatedBooking,
       error: updateError
-
     } = await supabaseAdmin
       .from('bookings')
       .update({
-
         status,
-
-        updated_at:
-          new Date().toISOString()
-
+        updated_at: new Date().toISOString()
       })
-      .eq(
-        'id',
-        id
-      )
+      .eq('id', id)
       .select()
       .single()
 
@@ -204,53 +188,55 @@ export async function PATCH(
 
 
     // Create notification
+
     let title = ''
     let message = ''
 
 
 
-    if (status === 'confirmed') {
+    switch(status) {
 
-      title =
-        'Bokning bekräftad'
+      case 'confirmed':
+
+        title =
+          'Bokning bekräftad'
+
+        message =
+          `Din bokning för ${booking.service_type} har bekräftats.`
+
+        break
 
 
-      message =
-        `Din bokning för ${booking.service_type} har bekräftats.`
+
+      case 'cancelled':
+
+        title =
+          'Bokning avbokad'
+
+        message =
+          `Din bokning för ${booking.service_type} har avbokats.`
+
+        break
+
+
+
+      case 'completed':
+
+        title =
+          'Bokning slutförd'
+
+        message =
+          `Din bokning för ${booking.service_type} är klar.`
+
+        break
 
     }
 
 
 
-    if (status === 'cancelled') {
-
-      title =
-        'Bokning avbokad'
 
 
-      message =
-        `Din bokning för ${booking.service_type} har avbokats.`
-
-    }
-
-
-
-    if (status === 'completed') {
-
-      title =
-        'Bokning slutförd'
-
-
-      message =
-        `Din bokning för ${booking.service_type} är klar.`
-
-    }
-
-
-
-
-
-    if (title) {
+    if(title) {
 
       await createNotification({
 
@@ -269,9 +255,8 @@ export async function PATCH(
 
 
 
+    // SEND EMAIL
 
-
-    // SEND EMAIL USING RESEND (Optional - only if API key configured)
     if (
       process.env.RESEND_API_KEY &&
       [
@@ -281,13 +266,21 @@ export async function PATCH(
       ].includes(status)
     ) {
 
+
       try {
+
+
+        const resend =
+          getResend()
+
+
 
         let EmailComponent = null
         let subject = ''
 
 
-        switch (status) {
+
+        switch(status) {
 
 
           case 'confirmed':
@@ -329,29 +322,41 @@ export async function PATCH(
 
 
 
-        if (EmailComponent) {
 
-          await resend.emails.send({
-
-            from:
-              'noreply@e-ambassade.se',
+        if(EmailComponent) {
 
 
-            to:
-              booking.email,
+          const result =
+            await resend.emails.send({
 
-            subject:
+              from:
+                'noreply@e-ambassade.se',
+
+              to:
+                booking.email,
+
               subject,
 
-            react: <EmailComponent booking={booking} />
+              react:
+                <EmailComponent booking={booking} />
 
-          })
+            })
+
+
+
+          console.log(
+            'RESEND EMAIL SENT:',
+            result?.id
+          )
+
 
         }
 
+
+
       } catch(emailError) {
 
-        // Log but don't block status update
+
         console.error(
           'RESEND EMAIL ERROR:',
           emailError?.message || emailError
@@ -360,7 +365,15 @@ export async function PATCH(
 
       }
 
+    } else {
+
+      console.log(
+        'RESEND_API_KEY missing or invalid status'
+      )
+
     }
+
+
 
 
     return NextResponse.json(
@@ -386,7 +399,6 @@ export async function PATCH(
         status: 500
       }
     )
-
 
   }
 
